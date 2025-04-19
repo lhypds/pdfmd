@@ -2,6 +2,7 @@
 import os
 import sys
 import subprocess
+from time import sleep
 import click
 import fitz
 import glob
@@ -67,7 +68,8 @@ def main(input_pdf, crop):
             sys.exit(0)
         click.echo("[INFO] Phase 2: converting cropped PDFs to Markdown...")
         for pdf in cropped_pdfs:
-            click.echo(f"[INFO] Converting {pdf} to Markdown...")
+            click.echo(f"[INFO] Converting {pdf} to Markdown... (Waiting 10s)")
+            sleep(10)  # Add a delay to avoid Too Many Requests error
             md_cmd = [
                 sys.executable,
                 os.path.join(scripts_dir, "pdfmd.py"),
