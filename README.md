@@ -62,6 +62,14 @@ python pdfcrop.py -i input.pdf [--page N] [--zoom Z]
 - `--page N`: zero‑based page index (default: 0, rarely used)
 - `--zoom Z`: rendering zoom factor (default: 2.0)
 
+Splitting Tool
+
+Run `pdfsplit.py` to split each page of a PDF into its own file:
+```bash
+python pdfsplit.py -i input.pdf
+```
+- `-i/--input`: source PDF file path (required)
+- Outputs `<input_basename>_pdfsplit_1.pdf`, `<input_basename>_pdfsplit_2.pdf`, …
 
 Notes
 -----
