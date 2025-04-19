@@ -3,3 +3,5 @@ rich
 click
 python-dotenv
 boto3
+pymupdf
+pillow

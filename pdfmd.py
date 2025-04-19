@@ -6,6 +6,7 @@ import requests
 import click
 from dotenv import load_dotenv  # load .env for environment variables
 from utils.aws_utils import upload_and_verify_pdf
+from pdfcrop import select_and_redact
 
 load_dotenv()
 from rich.progress import (
@@ -33,8 +34,24 @@ AWS_S3_BUCKET = os.getenv("AWS_S3_BUCKET")
 @click.option(
     "-o", "--output", "output_path", required=True, help="Output Markdown file path"
 )
-def main(input_path, output_path):
+@click.option(
+    "-c",
+    "--crop",
+    "crop",
+    is_flag=True,
+    default=False,
+    help="Crop PDF image area before processing",
+)
+def main(input_path, output_path, crop):
     click.echo("[INFO] Starting PDF to Markdown conversion...")
+    if crop:
+        base, _ = os.path.splitext(input_path)
+        cropped_pdf = f"{base}_cropped.pdf"
+        cropped_img = f"{base}_crop.png"
+        click.echo(f"[INFO] Cropping PDF: {input_path} -> {cropped_pdf}")
+        select_and_redact(input_path, cropped_pdf, cropped_img)
+        click.echo(f"[INFO] Using cropped PDF for processing: {cropped_pdf}")
+        input_path = cropped_pdf
     if not AZURE_ENDPOINT or not AZURE_API_KEY:
         click.echo(
             "Error: AZURE_ENDPOINT and AZURE_API_KEY environment variables must be set."
