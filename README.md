@@ -52,9 +52,11 @@ Convert a PDF to Markdown:
 python pdfmd.py -i input.pdf
 ```
 
+Output file (single): `<input_basename>_pdfmd.md`  
+
 2. pdfcrop.py  
 
-Crop to remove (Ctrl) or corp to save:  
+Crop area to remove (press Ctrl) or corp to both remove and save as PNG:  
 
 ```bash
 python pdfcrop.py -i input.pdf --page 1
@@ -70,6 +72,8 @@ Crop output is single page PDF.
 - Selections always export as `1.png`, `2.png` ...  
 - Zoom level is now read from the `PDFCROP_ZOOM_LEVEL` environment variable (set in `.env`; default 2).  
 
+Output file (single): `<input_basename>_pdfcrop_<page>.pdf`  
+
 3. excelpdf.py  
 
 Convert Excel to PDFs, one sheet one PDF file.  
@@ -78,9 +82,11 @@ Convert Excel to PDFs, one sheet one PDF file.
 python excelpdf.py -i input.xslx
 ```
 
+Output file (multiple): `<input_basename>_<sheet>.pdf`  
+
 4. pdfsplit.py
 
-Splitting Tool
+Splitting multple page PDF to single page PDFs.  
 
 Run `pdfsplit.py` to split each page of a PDF into its own file:
 ```bash
@@ -88,8 +94,8 @@ python pdfsplit.py -i input.pdf
 ```
 
 - `-i/--input`: source PDF file path (required)
-- Outputs `<input_basename>_pdfsplit_1.pdf`, `<input_basename>_pdfsplit_2.pdf`, …
 
+Output file (multiple): `<input_basename>_pdfsplit_<page>.pdf`  
 
 
 Notes
