@@ -23,16 +23,15 @@ load_dotenv()
 def select_and_redact(
     pdf_path: str, out_pdf: str, page_index: int = 1, zoom: float = 2.0
 ) -> None:
+    # derive base name for PNG outputs
+    base_name = os.path.splitext(os.path.basename(pdf_path))[0]
     """
     1. Renders page_index with the given zoom.
     2. Opens a Tk window to let the user draw a rectangle.
     4. Draws an opaque white rectangle in the PDF and saves out_pdf.
     """
-    # Cleanup previous redacted PDF and cropped PNGs (images named 1.png, 2.png, ...)
-    if os.path.exists(out_pdf):
-        os.remove(out_pdf)
-    # cleanup previous PNGs for this page
-    for old in glob.glob(f"{page_index}_*.png"):
+    # cleanup previous output files
+    for old in glob.glob(f"{base_name}_pdfcrop_*"):
         os.remove(old)
 
     # store paths of all cropped images
@@ -118,7 +117,7 @@ def select_and_redact(
     for idx, (x0, y0, x1, y1, skip_png, _rect_id) in enumerate(selections, start=1):
         if not skip_png:
             cropped = img.crop((x0, y0, x1, y1))
-            img_path = f"{page_index}_{idx}.png"
+            img_path = f"{base_name}_pdfcrop_{page_index}_{idx}.png"
             cropped.save(img_path, "PNG")
             print(f"✓  Cropped image exported to {img_path}")
             img_paths.append(img_path)
