@@ -33,13 +33,6 @@ AWS_S3_BUCKET = os.getenv("AWS_S3_BUCKET")
 @click.command()
 @click.option("-i", "--input", "input_path", required=True, help="Input PDF file path")
 @click.option(
-    "-o",
-    "--output",
-    "output_path",
-    default=None,
-    help="Output Markdown file path; defaults to '<input_basename>_pdfmd.md'",
-)
-@click.option(
     "-c",
     "--crop",
     "crop",
@@ -47,12 +40,11 @@ AWS_S3_BUCKET = os.getenv("AWS_S3_BUCKET")
     default=False,
     help="Crop PDF image area before processing",
 )
-def main(input_path, output_path, crop):
+def main(input_path, crop):
     click.echo("[INFO] Starting PDF to Markdown conversion...")
-    # derive output markdown path if not provided
-    if not output_path:
-        base, _ = os.path.splitext(input_path)
-        output_path = f"{base}_pdfmd.md"
+    # derive output markdown path
+    base, _ = os.path.splitext(input_path)
+    output_path = f"{base}_pdfmd.md"
     # Remove existing markdown output to avoid stale content
     if os.path.exists(output_path):
         os.remove(output_path)
