@@ -41,17 +41,18 @@ Split, crop PDF and convert to Markdown:
 python main.py -i input.pdf -c
 ```
 
+Input can be multiple files, if input is a folder it will loop all PDFs in the folder.  
+
 Convert a PDF to Markdown:
 
 ```bash
 python pdfmd.py -i input.pdf
 ```
 
-The PDF converter will only take care the 1st page of the input PDF ifle.
+The PDF converter will only take care the 1st page of the input PDF file.  
 
-Crop Tool
-
-Run `pdfcrop.py` independently to select, crop, and redact:
+Crop Tool  
+Crop to remove or corp to save:  
 
 ```bash
 python pdfcrop.py -i input.pdf --page 1
