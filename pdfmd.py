@@ -43,6 +43,8 @@ AWS_S3_BUCKET = os.getenv("AWS_S3_BUCKET")
 )
 def main(input_path, crop):
     click.echo("[INFO] Starting PDF to Markdown conversion...")
+    # initialize list for any cropped images
+    img_paths = []
     # derive output markdown path
     base, _ = os.path.splitext(input_path)
     output_path = f"{base}_pdfmd.md"
@@ -60,11 +62,18 @@ def main(input_path, crop):
             "-i",
             input_path,
         ]
-        result = subprocess.run(cmd, capture_output=True, text=True)
+        # capture output with UTF-8 decoding to handle Unicode properly on Windows
+        result = subprocess.run(
+            cmd, capture_output=True, text=True, encoding="utf-8", errors="replace"
+        )
         if result.returncode != 0:
             click.echo(result.stderr)
             sys.exit(result.returncode)
         click.echo(result.stdout)
+        # parse stdout to collect cropped image filenames
+        for line in result.stdout.splitlines():
+            if "Cropped image exported to" in line:
+                img_paths.append(line.split()[-1])
         # wait up to 5s for the cropped PDF to appear
         timeout = 5
         elapsed = 0
