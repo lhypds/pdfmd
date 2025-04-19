@@ -98,24 +98,25 @@ def select_and_redact(
         print("No area selected; exiting.")
         return
 
-    # Process each selection: save crop and mark redaction
+    # Save crops and collect rects for redaction
     for idx, (x0, y0, x1, y1) in enumerate(selections, start=1):
-        # Save cropped selection as PNG
         cropped = img.crop((x0, y0, x1, y1))
         img_path = f"{page_index}_{idx}.png"
         cropped.save(img_path, "PNG")
         print(f"✓  Cropped image exported to {img_path}")
         img_paths.append(img_path)
-        # Mark for redaction
-        rect_pdf = fitz.Rect(x0 / zoom, y0 / zoom, x1 / zoom, y1 / zoom)
-        page.add_redact_annot(rect_pdf, fill=(1, 1, 1))
-    # Apply all redactions
-    page.apply_redactions()
 
-    # Create a new PDF with only the redacted page
-    new_doc = fitz.open()  # Create a new empty PDF
+    # Create a new PDF with only the selected page and apply true redactions
+    new_doc = fitz.open()
     new_doc.insert_pdf(doc, from_page=page_index - 1, to_page=page_index - 1)
-    new_doc.save(out_pdf)
+    new_page = new_doc[0]
+    # Add redact annotations for each selected rect, then remove underlying content
+    for x0, y0, x1, y1 in selections:
+        rect_pdf = fitz.Rect(x0 / zoom, y0 / zoom, x1 / zoom, y1 / zoom)
+        new_page.add_redact_annot(rect_pdf, fill=(1, 1, 1))
+    new_page.apply_redactions()
+    # Save with compression to keep file size small
+    new_doc.save(out_pdf, deflate=True, garbage=4)
     new_doc.close()
     doc.close()  # Close the original document
     print(f"✓  Redacted page saved to {out_pdf}")
