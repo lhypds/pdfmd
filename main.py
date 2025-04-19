@@ -45,6 +45,8 @@ def main(input_pdfs, crop):
         base = os.path.splitext(os.path.basename(input_pdf))[0]
         scripts_dir = os.path.dirname(__file__)
 
+        # Phase 1: Split pages
+        splited_pdfs = []
         if crop:
             click.echo("[INFO] Counting pages via PyMuPDF...")
             doc = fitz.open(input_pdf)
@@ -53,7 +55,6 @@ def main(input_pdfs, crop):
             click.echo(f"[INFO] PDF has {num_pages} pages.")
             cropped_pdfs = []
 
-            # Phase 1: crop pages
             for i in range(1, num_pages + 1):
                 # Check the pdfcrop file exists, if exists, skip the cropping
                 out_pdf = f"{base}_pdfcrop_{i}.pdf"
@@ -75,86 +76,92 @@ def main(input_pdfs, crop):
                 # pdfcrop.py already names output as <base>_pdfcrop_<page>.pdf
                 out_pdf = f"{base}_pdfcrop_{i}.pdf"
                 cropped_pdfs.append(out_pdf)
-
-            # Phase 2: convert cropped PDFs to Markdown
-            # Confirm before proceeding to Phase 2
-            if not click.confirm(
-                f"[CONFIRM] Proceed to Phase 2: convert cropped PDFs to Markdown for {input_pdf}?",
-                default=True,
-            ):
-                click.echo("[ABORT] Phase 2 cancelled. Exiting.")
-                sys.exit(0)
-            click.echo("[INFO] Phase 2: converting cropped PDFs to Markdown...")
-            for pdf in cropped_pdfs:
-                # Retry loop on conversion failure
-                while True:
-                    click.echo(
-                        f"[INFO] Converting {pdf} to Markdown... (Waiting 30s to avoid rate limit)"
-                    )
-                    sleep(30)
-                    md_cmd = [
-                        sys.executable,
-                        os.path.join(scripts_dir, "pdfmd.py"),
-                        "-i",
-                        pdf,
-                    ]
-                    try:
-                        subprocess.run(md_cmd, check=True)
-                        break  # success, move to next PDF
-                    except Exception as e:
-                        click.echo(
-                            f"ERROR: Failed to convert {pdf} to Markdown. Reason: {e}",
-                            err=True,
-                        )
-                        # Prompt to retry or abort
-                        if click.confirm(
-                            "Retry conversion of this file?", default=False
-                        ):
-                            continue
-                        else:
-                            click.echo("Aborting Phase 2.")
-                            sys.exit(1)
-
-            # Phase 3: combine Markdown files
-            # Confirm before proceeding to Phase 3
-            if click.confirm(
-                f"[CONFIRM] Phase 2 complete. Proceed to Phase 3: combine Markdown files for {input_pdf}?",
-                default=True,
-            ):
-                click.echo("[INFO] Phase 3: combining Markdown files...")
-                # collect and sort markdown files by page index
-                md_files = sorted(
-                    glob.glob("*_pdfmd.md"),
-                    key=lambda x: int(
-                        re.search(r"_pdfcrop_(\d+)_pdfmd\.md$", x).group(1)
-                    ),
-                )
-                combined = f"{base}_pdfmd.md"
-                with open(combined, "w", encoding="utf-8") as fout:
-                    for md in md_files:
-                        click.echo(f"[INFO] Adding {md} to {combined}")
-                        with open(md, "r", encoding="utf-8") as fin:
-                            fcontent = fin.read()
-
-                            # Trim some unnecessarey text
-                            # Remove ":unselected:" and ":selected:"
-                            fcontent = re.sub(r":unselected:|:selected:", "", fcontent)
-
-                            fout.write(fcontent)
-                            fout.write("\n\n")
-                click.echo(f"[INFO] Combined Markdown saved as {combined}")
-            else:
-                click.echo("[ABORT] Phase 3 cancelled.")
+                splited_pdfs = sorted(cropped_pdfs)
 
         else:
-            click.echo(f"[INFO] Converting {input_pdf} to Markdown...")
-            md_cmd = [
+            # Split input PDF into single page PDF with pdfsplit.py
+            click.echo("[INFO] Splitting PDF via pdfsplit.py...")
+            split_cmd = [
                 sys.executable,
-                os.path.join(scripts_dir, "pdfmd.py"),
+                os.path.join(scripts_dir, "pdfsplit.py"),
                 "-i",
                 input_pdf,
             ]
-            subprocess.run(md_cmd, check=True)
+            subprocess.run(split_cmd, check=True)
+
+            # pdfsplit.py names output as <base>_pdfsplit_<page>.pdf
+            # Collect all split PDFs
+            splited_pdfs = sorted(
+                glob.glob(f"{base}_pdfsplit_*.pdf"),
+                key=lambda x: int(re.search(r"_pdfsplit_(\d+)\.pdf$", x).group(1)),
+            )
+            click.echo(f"[INFO] Split PDFs: {splited_pdfs}")
+
+        # Phase 2: convert cropped PDFs to Markdown
+        # Confirm before proceeding to Phase 2
+        if not click.confirm(
+            f"[CONFIRM] Proceed to Phase 2: convert cropped PDFs to Markdown for {input_pdf}?",
+            default=True,
+        ):
+            click.echo("[ABORT] Phase 2 cancelled. Exiting.")
+            sys.exit(0)
+        click.echo("[INFO] Phase 2: converting cropped PDFs to Markdown...")
+        for pdf in splited_pdfs:
+            # Retry loop on conversion failure
+            while True:
+                click.echo(
+                    f"[INFO] Converting {pdf} to Markdown... (waiting 30s to avoid rate limit)"
+                )
+                sleep(30)
+                md_cmd = [
+                    sys.executable,
+                    os.path.join(scripts_dir, "pdfmd.py"),
+                    "-i",
+                    pdf,
+                ]
+                try:
+                    subprocess.run(md_cmd, check=True)
+                    break  # success, move to next PDF
+                except Exception as e:
+                    click.echo(
+                        f"ERROR: Failed to convert {pdf} to Markdown. Reason: {e}",
+                        err=True,
+                    )
+                    # Prompt to retry or abort
+                    if click.confirm("Retry conversion of this file?", default=False):
+                        continue
+                    else:
+                        click.echo("Aborting Phase 2.")
+                        sys.exit(1)
+
+        # Phase 3: combine Markdown files
+        # Confirm before proceeding to Phase 3
+        if click.confirm(
+            f"[CONFIRM] Phase 2 complete. Proceed to Phase 3: combine Markdown files for {input_pdf}?",
+            default=True,
+        ):
+            click.echo("[INFO] Phase 3: combining Markdown files...")
+            # collect and sort markdown files by page index
+            md_files = sorted(
+                glob.glob("*_pdfmd.md"),
+                key=lambda x: int(re.search(r"_pdfcrop_(\d+)_pdfmd\.md$", x).group(1)),
+            )
+            combined = f"{base}_pdfmd.md"
+            with open(combined, "w", encoding="utf-8") as fout:
+                for md in md_files:
+                    click.echo(f"[INFO] Adding {md} to {combined}")
+                    with open(md, "r", encoding="utf-8") as fin:
+                        fcontent = fin.read()
+
+                        # Trim some unnecessarey text
+                        # Remove ":unselected:" and ":selected:"
+                        fcontent = re.sub(r":unselected:|:selected:", "", fcontent)
+
+                        fout.write(fcontent)
+                        fout.write("\n\n")
+            click.echo(f"[INFO] Combined Markdown saved as {combined}")
+        else:
+            click.echo("[ABORT] Phase 3 cancelled.")
 
     print("[INFO] All done!")
 
