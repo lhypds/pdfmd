@@ -20,18 +20,14 @@ Setup
    pip install -r requirements.txt
    ```
 
-3. Create a `.env` file in the project root with your Azure credentials:
+3. Create a `.env` file in the project root with your Azure and AWS configuration:
 
    ```dotenv
    AZURE_ENDPOINT=https://<your-resource>.cognitiveservices.azure.com
    AZURE_API_KEY=<your-key>
-   ```
-
-4. Add AWS S3 bucket and credentials:
-
-   In `.env` set your S3 bucket name:
-   ```dotenv
    AWS_S3_BUCKET=<your-bucket-name>
+   AWS_ACCESS_KEY_ID=<your-aws-access-key-id>
+   AWS_SECRET_ACCESS_KEY=<your-aws-secret-access-key>
    ```
 
 
