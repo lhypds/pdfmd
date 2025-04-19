@@ -34,7 +34,7 @@ AWS_S3_BUCKET = os.getenv("AWS_S3_BUCKET")
     "-o", "--output", "output_path", required=True, help="Output Markdown file path"
 )
 def main(input_path, output_path):
-    """Convert a PDF to Markdown using Azure Document Intelligence REST API"""
+    click.echo("[INFO] Starting PDF to Markdown conversion...")
     if not AZURE_ENDPOINT or not AZURE_API_KEY:
         click.echo(
             "Error: AZURE_ENDPOINT and AZURE_API_KEY environment variables must be set."
@@ -42,17 +42,33 @@ def main(input_path, output_path):
         return
 
     if not AWS_S3_BUCKET:
-        click.echo("Error: AWS_S3_BUCKET environment variable must be set.")
+        click.echo("[ERROR] AWS_S3_BUCKET environment variable must be set.")
         return
 
     # upload PDF to S3
+    click.echo(f"[INFO] Uploading {input_path} to S3 bucket {AWS_S3_BUCKET}...")
     s3 = boto3.client("s3")
     key = os.path.basename(input_path)
     s3.upload_file(input_path, AWS_S3_BUCKET, key)
-    pdf_url = f"https://{AWS_S3_BUCKET}.s3.amazonaws.com/{key}"
+    # generate presigned URL for the uploaded PDF
+    pdf_url = s3.generate_presigned_url(
+        "get_object", Params={"Bucket": AWS_S3_BUCKET, "Key": key}, ExpiresIn=3600
+    )
+    click.echo(f"[INFO] Uploaded PDF URL: {pdf_url}")
+
+    click.echo("[INFO] Verifying uploaded PDF URL accessibility via GET...")
+    try:
+        resp = requests.get(pdf_url, stream=True)
+        resp.raise_for_status()
+        click.echo("[INFO] PDF URL is accessible.")
+        resp.close()
+    except Exception as e:
+        click.echo(f"[ERROR] Unable to access PDF URL: {e}")
+        return
 
     # analyze via URL source
     analyze_url = f"{AZURE_ENDPOINT}/documentintelligence/documentModels/{MODEL_ID}:analyze?_overload=analyzeDocument&api-version={API_VERSION}"
+    click.echo(f"[INFO] Sending analyze request to Azure: {analyze_url}")
     headers = {
         "Ocp-Apim-Subscription-Key": AZURE_API_KEY,
         "Content-Type": "application/json",
@@ -60,6 +76,9 @@ def main(input_path, output_path):
     response = requests.post(analyze_url, headers=headers, json={"urlSource": pdf_url})
     response.raise_for_status()
     operation_location = response.headers.get("Operation-Location")
+    click.echo(
+        f"[INFO] Analyze operation initiated. Operation-Location: {operation_location}"
+    )
 
     # submit request and poll
     with Progress(
@@ -71,7 +90,7 @@ def main(input_path, output_path):
         task = progress.add_task("Analyzing document", start=False)
         progress.start_task(task)
 
-        # poll
+        click.echo("[INFO] Polling analysis status...")
         while True:
             poll = requests.get(
                 operation_location, headers={"Ocp-Apim-Subscription-Key": AZURE_API_KEY}
@@ -79,13 +98,16 @@ def main(input_path, output_path):
             poll.raise_for_status()
             result = poll.json()
             status = result.get("status")
+            click.echo(f"[INFO] Current analysis status: {status}")
             if status and status.lower() == "succeeded":
+                click.echo("[INFO] Analysis succeeded.")
                 break
             elif status and status.lower() == "failed":
-                click.echo("Analysis failed")
+                click.echo("[ERROR] Analysis failed.")
                 return
             time.sleep(1)
 
+    click.echo("[INFO] Parsing analysis result...")
     analyze_result = result.get("analyzeResult", {})
     md = []
 
