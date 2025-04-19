@@ -26,6 +26,8 @@ def select_and_redact(
     for old in glob.glob("[0-9]*.png"):
         os.remove(old)
 
+    # store paths of all cropped images
+    img_paths = []
     doc = fitz.open(pdf_path)
     page = doc[page_index]
 
@@ -97,6 +99,7 @@ def select_and_redact(
         img_path = f"{idx}.png"
         cropped.save(img_path, "PNG")
         print(f"✓  Cropped image exported to {img_path}")
+        img_paths.append(img_path)
         # Mark for redaction
         rect_pdf = fitz.Rect(x0 / zoom, y0 / zoom, x1 / zoom, y1 / zoom)
         page.add_redact_annot(rect_pdf, fill=(1, 1, 1))
@@ -106,6 +109,7 @@ def select_and_redact(
     doc.save(out_pdf)
     doc.close()
     print(f"✓  Redacted page saved to {out_pdf}")
+    return img_paths
 
 
 # Command-line interface

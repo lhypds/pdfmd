@@ -61,7 +61,7 @@ def main(input_path, output_path, crop):
         cropped_pdf = f"{base}_pdfcrop.pdf"
         cropped_img = f"{base}_crop.png"
         click.echo(f"[INFO] Cropping PDF: {input_path} -> {cropped_pdf}")
-        select_and_redact(input_path, cropped_pdf, cropped_img)
+        img_paths = select_and_redact(input_path, cropped_pdf, cropped_img)
         click.echo(f"[INFO] Using cropped PDF for processing: {cropped_pdf}")
         input_path = cropped_pdf
     if not AZURE_ENDPOINT or not AZURE_API_KEY:
@@ -169,11 +169,10 @@ def main(input_path, output_path, crop):
     # write markdown to derived output path
     with open(output_path, "w", encoding="utf-8") as f:
         f.write("\n".join(md))
-    # Cleanup temporary crop files if used
-    if crop:
-        # remove temporary cropped PDF (retain crop PNGs)
-        if os.path.exists(cropped_pdf):
-            os.remove(cropped_pdf)
+    click.echo(f"[INFO] Markdown saved to: {output_path}")
+    # Report cropped image outputs in one line
+    if crop and img_paths:
+        click.echo(f"[INFO] Cropped images saved to: {', '.join(img_paths)}")
 
 
 if __name__ == "__main__":
