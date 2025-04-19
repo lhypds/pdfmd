@@ -57,6 +57,7 @@ def main(input_pdf, crop):
             out_pdf = f"{base}_pdfcrop_{i}.pdf"
             cropped_pdfs.append(out_pdf)
 
+        # Phase 2: convert cropped PDFs to Markdown
         # Confirm before proceeding to Phase 2
         if not click.confirm(
             "[CONFIRM] Proceed to Phase 2: convert cropped PDFs to Markdown?",
@@ -75,6 +76,7 @@ def main(input_pdf, crop):
             ]
             subprocess.run(md_cmd, check=True)
 
+        # Phase 3: combine Markdown files
         # Confirm before proceeding to Phase 3
         if click.confirm(
             "[CONFIRM] Phase 2 complete. Proceed to Phase 3: combine Markdown files?",
@@ -94,8 +96,7 @@ def main(input_pdf, crop):
                         fout.write(fin.read())
                         fout.write("\n\n")
             click.echo(f"[INFO] Combined Markdown saved as {combined}")
-        else:
-            click.echo("[INFO] Phase 3 skipped.")
+
     else:
         click.echo(f"[INFO] Converting {input_pdf} to Markdown...")
         md_cmd = [
@@ -105,6 +106,8 @@ def main(input_pdf, crop):
             input_pdf,
         ]
         subprocess.run(md_cmd, check=True)
+
+    print("[INFO] All done!")
 
 
 if __name__ == "__main__":
