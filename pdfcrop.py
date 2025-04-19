@@ -63,8 +63,11 @@ def select_and_redact(
 
     def on_press(event):
         sel["x0"], sel["y0"] = event.x, event.y
+        # detect Ctrl pressed (skip saving PNG)
+        ctrl = (event.state & 0x4) != 0
+        sel["skip_png"] = ctrl
         sel["rect"] = canvas.create_rectangle(
-            event.x, event.y, event.x, event.y, outline="red"
+            event.x, event.y, event.x, event.y, outline="gray" if ctrl else "red"
         )
 
     def on_drag(event):
@@ -79,7 +82,8 @@ def select_and_redact(
             x0, x1 = x1, x0
         if y0 > y1:
             y0, y1 = y1, y0
-        selections.append((x0, y0, x1, y1))
+        # include skip flag for PNG
+        selections.append((x0, y0, x1, y1, sel.get("skip_png", False)))
 
     # Bind mouse events for drawing rectangles
     canvas.bind("<ButtonPress-1>", on_press)
@@ -98,20 +102,21 @@ def select_and_redact(
         print("No area selected; exiting.")
         return
 
-    # Save crops and collect rects for redaction
-    for idx, (x0, y0, x1, y1) in enumerate(selections, start=1):
-        cropped = img.crop((x0, y0, x1, y1))
-        img_path = f"{page_index}_{idx}.png"
-        cropped.save(img_path, "PNG")
-        print(f"✓  Cropped image exported to {img_path}")
-        img_paths.append(img_path)
+    # Save crops (unless skipped) and collect rects for redaction
+    for idx, (x0, y0, x1, y1, skip_png) in enumerate(selections, start=1):
+        if not skip_png:
+            cropped = img.crop((x0, y0, x1, y1))
+            img_path = f"{page_index}_{idx}.png"
+            cropped.save(img_path, "PNG")
+            print(f"✓  Cropped image exported to {img_path}")
+            img_paths.append(img_path)
 
     # Create a new PDF with only the selected page and apply true redactions
     new_doc = fitz.open()
     new_doc.insert_pdf(doc, from_page=page_index - 1, to_page=page_index - 1)
     new_page = new_doc[0]
     # Add redact annotations for each selected rect, then remove underlying content
-    for x0, y0, x1, y1 in selections:
+    for x0, y0, x1, y1, _skip_png in selections:
         rect_pdf = fitz.Rect(x0 / zoom, y0 / zoom, x1 / zoom, y1 / zoom)
         new_page.add_redact_annot(rect_pdf, fill=(1, 1, 1))
     new_page.apply_redactions()
