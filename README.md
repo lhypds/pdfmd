@@ -37,18 +37,19 @@ Usage
 Convert a PDF to Markdown:
 
 ```bash
-python pdfmd.py -i input.pdf [-c]
+python pdfmd.py -i input.pdf [-c [--zoom Z]]
 ```
+- `--zoom Z`: only applies when `-c/--crop` is specified; controls the rendering zoom factor for cropping (default: 2.0).
 
 Cropping Option  
 Use `-c, --crop` to interactively select and redact areas before conversion:
 
 ```bash
-python pdfmd.py -i input.pdf -c
+python pdfmd.py -i input.pdf -c [--zoom Z]
 ```
 - Selections are exported as numbered PNGs (`1.png`, `2.png`, …).
 - The redacted PDF used for conversion is `<input_basename>_pdfcrop.pdf`.
-- The preview defaults to 2× zoom (render ~144 dpi). You can change page or zoom via the standalone tool CLI.
+- The preview defaults to 2× zoom (render ~144 dpi). Pass `--zoom <factor>` (e.g. `--zoom 3.0`) alongside `-c` to adjust rendering resolution.
 
 Standalone Crop Tool
 

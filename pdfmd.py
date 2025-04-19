@@ -41,7 +41,14 @@ AWS_S3_BUCKET = os.getenv("AWS_S3_BUCKET")
     default=False,
     help="Crop PDF image area before processing",
 )
-def main(input_path, crop):
+@click.option(
+    "--zoom",
+    "zoom",
+    default=2.0,
+    type=float,
+    help="Zoom factor for cropping (only relevant with -c; default: 2.0)",
+)
+def main(input_path, crop, zoom):
     click.echo("[INFO] Starting PDF to Markdown conversion...")
     # initialize list for any cropped images
     img_paths = []
@@ -55,12 +62,13 @@ def main(input_path, crop):
         base, _ = os.path.splitext(input_path)
         cropped_pdf = f"{base}_pdfcrop.pdf"
         click.echo(f"[INFO] Launching external crop tool: pdfcrop.py -i {input_path}")
-        # execute pdfcrop.py CLI with explicit output path
         cmd = [
             sys.executable,
             os.path.join(os.path.dirname(__file__), "pdfcrop.py"),
             "-i",
             input_path,
+            "--zoom",
+            str(zoom),
         ]
         # capture output with UTF-8 decoding to handle Unicode properly on Windows
         result = subprocess.run(
