@@ -63,6 +63,13 @@ def main(input_pdfs, crop):
 
             # Phase 1: crop pages
             for i in range(1, num_pages + 1):
+                # Check the pdfcrop file exists, if exists, skip the cropping
+                out_pdf = f"{base}_pdfcrop_{i}.pdf"
+                if os.path.isfile(out_pdf):
+                    click.echo(f"[INFO] Cropped PDF already exists: {out_pdf}")
+                    cropped_pdfs.append(out_pdf)
+                    continue
+
                 click.echo(f"[INFO] Cropping page {i} via pdfcrop.py...")
                 crop_cmd = [
                     sys.executable,
