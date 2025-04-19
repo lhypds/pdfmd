@@ -1,4 +1,3 @@
-
 pdfmd
 =====
 
@@ -10,15 +9,14 @@ Setup
 
 1. Create a virtual environment and activate it:
 
-   ```powershell
-   # Windows PowerShell
+   ```
    python -m venv venv
-   venv\Scripts\Activate.ps1
+   venv\Scripts\Activate
    ```
 
 2. Install dependencies:
 
-   ```powershell
+   ```
    pip install -r requirements.txt
    ```
 
@@ -29,13 +27,20 @@ Setup
    AZURE_API_KEY=<your-key>
    ```
 
+4. Add AWS S3 bucket and credentials:
+
+   In `.env` set your S3 bucket name:
+   ```dotenv
+   AWS_S3_BUCKET=<your-bucket-name>
+   ```
+
 
 Usage
 -----
 
 Convert a PDF to Markdown:
 
-```powershell
+```
 python pdfmd.py -i input.pdf -o output.md
 ```
 

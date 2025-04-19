@@ -4,6 +4,7 @@ import time
 import json
 import requests
 import click
+import boto3  # AWS S3 client
 from dotenv import load_dotenv  # load .env for environment variables
 
 load_dotenv()
@@ -18,8 +19,13 @@ from rich.progress import (
 # Azure Document Intelligence REST API configuration
 AZURE_ENDPOINT = os.getenv("AZURE_ENDPOINT")
 AZURE_API_KEY = os.getenv("AZURE_API_KEY")
+# normalize endpoint to avoid double slashes
+AZURE_ENDPOINT = AZURE_ENDPOINT.rstrip("/") if AZURE_ENDPOINT else None
 API_VERSION = "2024-11-30"
 MODEL_ID = "prebuilt-layout"
+
+# AWS S3 bucket for uploads
+AWS_S3_BUCKET = os.getenv("AWS_S3_BUCKET")
 
 
 @click.command()
@@ -35,16 +41,25 @@ def main(input_path, output_path):
         )
         return
 
-    # read PDF
-    with open(input_path, "rb") as f:
-        pdf_data = f.read()
+    if not AWS_S3_BUCKET:
+        click.echo("Error: AWS_S3_BUCKET environment variable must be set.")
+        return
 
-    analyze_url = f"{AZURE_ENDPOINT}/formrecognizer/documentModels/{MODEL_ID}:analyze?api-version={API_VERSION}"
+    # upload PDF to S3
+    s3 = boto3.client("s3")
+    key = os.path.basename(input_path)
+    s3.upload_file(input_path, AWS_S3_BUCKET, key)
+    pdf_url = f"https://{AWS_S3_BUCKET}.s3.amazonaws.com/{key}"
 
+    # analyze via URL source
+    analyze_url = f"{AZURE_ENDPOINT}/documentintelligence/documentModels/{MODEL_ID}:analyze?_overload=analyzeDocument&api-version={API_VERSION}"
     headers = {
         "Ocp-Apim-Subscription-Key": AZURE_API_KEY,
-        "Content-Type": "application/pdf",
+        "Content-Type": "application/json",
     }
+    response = requests.post(analyze_url, headers=headers, json={"urlSource": pdf_url})
+    response.raise_for_status()
+    operation_location = response.headers.get("Operation-Location")
 
     # submit request and poll
     with Progress(
@@ -55,10 +70,6 @@ def main(input_path, output_path):
     ) as progress:
         task = progress.add_task("Analyzing document", start=False)
         progress.start_task(task)
-
-        response = requests.post(analyze_url, headers=headers, data=pdf_data)
-        response.raise_for_status()
-        operation_location = response.headers.get("Operation-Location")
 
         # poll
         while True:
