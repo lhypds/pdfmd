@@ -1,0 +1,4 @@
+requests
+rich
+click
+python-dotenv
