@@ -87,17 +87,34 @@ def main(input_pdfs, crop):
                 sys.exit(0)
             click.echo("[INFO] Phase 2: converting cropped PDFs to Markdown...")
             for pdf in cropped_pdfs:
-                click.echo(
-                    f"[INFO] Converting {pdf} to Markdown... (Waiting 30s to avoid rate limit)"
-                )
-                sleep(30)  # Add a delay to avoid Too Many Requests error
-                md_cmd = [
-                    sys.executable,
-                    os.path.join(scripts_dir, "pdfmd.py"),
-                    "-i",
-                    pdf,
-                ]
-                subprocess.run(md_cmd, check=True)
+                # Retry loop on conversion failure
+                while True:
+                    click.echo(
+                        f"[INFO] Converting {pdf} to Markdown... (Waiting 30s to avoid rate limit)"
+                    )
+                    sleep(30)
+                    md_cmd = [
+                        sys.executable,
+                        os.path.join(scripts_dir, "pdfmd.py"),
+                        "-i",
+                        pdf,
+                    ]
+                    try:
+                        subprocess.run(md_cmd, check=True)
+                        break  # success, move to next PDF
+                    except Exception as e:
+                        click.echo(
+                            f"ERROR: Failed to convert {pdf} to Markdown. Reason: {e}",
+                            err=True,
+                        )
+                        # Prompt to retry or abort
+                        if click.confirm(
+                            "Retry conversion of this file?", default=False
+                        ):
+                            continue
+                        else:
+                            click.echo("Aborting Phase 2.")
+                            sys.exit(1)
 
             # Phase 3: combine Markdown files
             # Confirm before proceeding to Phase 3
