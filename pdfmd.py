@@ -32,7 +32,11 @@ AWS_S3_BUCKET = os.getenv("AWS_S3_BUCKET")
 @click.command()
 @click.option("-i", "--input", "input_path", required=True, help="Input PDF file path")
 @click.option(
-    "-o", "--output", "output_path", required=True, help="Output Markdown file path"
+    "-o",
+    "--output",
+    "output_path",
+    default=None,
+    help="Output Markdown file path; defaults to '<input_basename>_pdfmd.md'",
 )
 @click.option(
     "-c",
@@ -44,9 +48,16 @@ AWS_S3_BUCKET = os.getenv("AWS_S3_BUCKET")
 )
 def main(input_path, output_path, crop):
     click.echo("[INFO] Starting PDF to Markdown conversion...")
+    # derive output markdown path if not provided
+    if not output_path:
+        base, _ = os.path.splitext(input_path)
+        output_path = f"{base}_pdfmd.md"
+    # Remove existing markdown output to avoid stale content
+    if os.path.exists(output_path):
+        os.remove(output_path)
     if crop:
         base, _ = os.path.splitext(input_path)
-        cropped_pdf = f"{base}_cropped.pdf"
+        cropped_pdf = f"{base}_pdfcrop.pdf"
         cropped_img = f"{base}_crop.png"
         click.echo(f"[INFO] Cropping PDF: {input_path} -> {cropped_pdf}")
         select_and_redact(input_path, cropped_pdf, cropped_img)
@@ -154,7 +165,7 @@ def main(input_path, output_path, crop):
                 md.append("| " + " | ".join(row) + " |")
             md.append("")
 
-    # write markdown
+    # write markdown to derived output path
     with open(output_path, "w", encoding="utf-8") as f:
         f.write("\n".join(md))
 

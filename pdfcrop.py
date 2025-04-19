@@ -4,7 +4,9 @@ Redact a user‑selected area in page 1 of a PDF and export the selection as PNG
 
 import sys
 import argparse
+import os
 import fitz  # PyMuPDF
+import glob
 import tkinter as tk
 from PIL import Image, ImageTk
 
@@ -18,6 +20,13 @@ def select_and_redact(
     3. Saves the cropped selection as out_img (PNG).
     4. Draws an opaque white rectangle in the PDF and saves out_pdf.
     """
+    # Cleanup previous redacted PDF and cropped PNGs
+    base_name = os.path.splitext(os.path.basename(pdf_path))[0]
+    if os.path.exists(out_pdf):
+        os.remove(out_pdf)
+    for old in glob.glob(f"{base_name}_crop_*.png"):
+        os.remove(old)
+
     doc = fitz.open(pdf_path)
     page = doc[page_index]
 
@@ -108,11 +117,15 @@ def main_cli():
     parser = argparse.ArgumentParser(
         description="Crop and redact regions of a PDF and export selections as PNG"
     )
-    parser.add_argument("input_pdf", help="Input PDF file path")
-    parser.add_argument("output_pdf", help="Output (redacted) PDF file path")
     parser.add_argument(
-        "base_img",
-        help="Base filename for cropped PNG exports (e.g. 'crop.png' yields 'crop_1.png', etc.)",
+        "-i", "--input", dest="input_pdf", required=True, help="Input PDF file path"
+    )
+    parser.add_argument(
+        "-o",
+        "--output",
+        dest="output_pdf",
+        help="Output (redacted) PDF file path; defaults to '<input_basename>_pdfcrop.pdf'",
+        default=None,
     )
     parser.add_argument(
         "--page", type=int, default=0, help="Page index (0-based) to crop, default 0"
@@ -121,8 +134,19 @@ def main_cli():
         "--zoom", type=float, default=2.0, help="Zoom factor for rendering, default 2.0"
     )
     args = parser.parse_args()
+    # Derive default output PDF if not provided
+    if not args.output_pdf:
+        base = os.path.splitext(os.path.basename(args.input_pdf))[0]
+        args.output_pdf = f"{base}_pdfcrop.pdf"
+    # Derive base image name for PNG exports
+    base = os.path.splitext(os.path.basename(args.input_pdf))[0]
+    base_img = f"{base}_crop.png"
     select_and_redact(
-        args.input_pdf, args.output_pdf, args.base_img, args.page, args.zoom
+        args.input_pdf,
+        args.output_pdf,
+        base_img,
+        args.page,
+        args.zoom,
     )
 
 
