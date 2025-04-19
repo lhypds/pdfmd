@@ -104,6 +104,8 @@ def main(input_pdf, crop):
                         fout.write(fcontent)
                         fout.write("\n\n")
             click.echo(f"[INFO] Combined Markdown saved as {combined}")
+        else:
+            click.echo("[ABORT] Phase 3 cancelled.")
 
     else:
         click.echo(f"[INFO] Converting {input_pdf} to Markdown...")
