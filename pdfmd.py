@@ -5,8 +5,6 @@ import requests
 import click
 from dotenv import load_dotenv  # load .env for environment variables
 from utils.aws_utils import upload_and_verify_pdf
-import subprocess
-import sys
 
 load_dotenv()
 from rich.progress import (
@@ -31,57 +29,13 @@ AWS_S3_BUCKET = os.getenv("AWS_S3_BUCKET")
 
 @click.command()
 @click.option("-i", "--input", "input_path", required=True, help="Input PDF file path")
-@click.option(
-    "-c",
-    "--crop",
-    "crop",
-    is_flag=True,
-    default=False,
-    help="Crop PDF image area before processing",
-)
-def main(input_path, crop):
+def main(input_path):
     click.echo("[INFO] Starting PDF to Markdown conversion...")
-    # initialize list for any cropped images
-    img_paths = []
+
     # derive output markdown path
     base, _ = os.path.splitext(input_path)
     output_path = f"{base}_pdfmd.md"
-    # Remove existing markdown output to avoid stale content
-    if os.path.exists(output_path):
-        os.remove(output_path)
-    if crop:
-        base, _ = os.path.splitext(input_path)
-        cropped_pdf = f"{base}_pdfcrop.pdf"
-        click.echo(f"[INFO] Launching external crop tool: pdfcrop.py -i {input_path}")
-        cmd = [
-            sys.executable,
-            os.path.join(os.path.dirname(__file__), "pdfcrop.py"),
-            "-i",
-            input_path,
-        ]
-        # capture output with UTF-8 decoding to handle Unicode properly on Windows
-        result = subprocess.run(
-            cmd, capture_output=True, text=True, encoding="utf-8", errors="replace"
-        )
-        if result.returncode != 0:
-            click.echo(result.stderr)
-            sys.exit(result.returncode)
-        click.echo(result.stdout)
-        # parse stdout to collect cropped image filenames
-        for line in result.stdout.splitlines():
-            if "Cropped image exported to" in line:
-                img_paths.append(line.split()[-1])
-        # wait up to 5s for the cropped PDF to appear
-        timeout = 5
-        elapsed = 0
-        while not os.path.exists(cropped_pdf) and elapsed < timeout:
-            time.sleep(0.5)
-            elapsed += 0.5
-        if not os.path.exists(cropped_pdf):
-            click.echo(f"[ERROR] Cropped PDF not found after wait: {cropped_pdf}")
-            sys.exit(1)
-        click.echo(f"[INFO] Using cropped PDF for processing: {cropped_pdf}")
-        input_path = cropped_pdf
+
     if not AZURE_ENDPOINT or not AZURE_API_KEY:
         click.echo(
             "Error: AZURE_ENDPOINT and AZURE_API_KEY environment variables must be set."
@@ -188,9 +142,6 @@ def main(input_path, crop):
     with open(output_path, "w", encoding="utf-8") as f:
         f.write("\n".join(md))
     click.echo(f"[INFO] Markdown saved to: {output_path}")
-    # Report cropped image outputs in one line
-    if crop and img_paths:
-        click.echo(f"[INFO] Cropped images saved to: {', '.join(img_paths)}")
 
 
 if __name__ == "__main__":

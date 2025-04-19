@@ -35,25 +35,21 @@ Setup
 Usage
 -----
 
+Split, crop PDF and convert to Markdown:
+
+```bash
+python main.py -i input.pdf -c
+```
+
 Convert a PDF to Markdown:
 
 ```bash
-python pdfmd.py -i input.pdf [-c]
+python pdfmd.py -i input.pdf
 ```
 
 The PDF converter will only take care the 1st page of the input PDF ifle.
 
-Cropping Option  
-Use `-c, --crop` to interactively select and redact areas before conversion:
-
-```bash
-python pdfmd.py -i input.pdf -c
-```
-- Selections are exported as numbered PNGs (`1.png`, `2.png`, …).
-- The redacted PDF used for conversion is `<input_basename>_pdfcrop.pdf`.
-- Zoom level is now read from the `PDFCROP_ZOOM_LEVEL` environment variable (set in `.env`; default 2).
-
-Standalone Crop Tool
+Crop Tool
 
 Run `pdfcrop.py` independently to select, crop, and redact:
 ```bash
