@@ -35,12 +35,15 @@ Setup
 Usage
 -----
 
-Split, crop PDF and convert to Markdown:
+Split, crop PDF and convert to Markdown:  
 
 ```bash
 python main.py -i input.pdf -c
 ```
 
+1. pdfmd.py  
+
+Input file must be single page PDF, if it is multiple pages, it will only process the first page.
 Input can be multiple files, if input is a folder it will loop all PDFs in the folder.  
 
 Convert a PDF to Markdown:
@@ -49,10 +52,9 @@ Convert a PDF to Markdown:
 python pdfmd.py -i input.pdf
 ```
 
-The PDF converter will only take care the 1st page of the input PDF file.  
+2. pdfcrop.py  
 
-Crop Tool  
-Crop to remove or corp to save:  
+Crop to remove (Ctrl) or corp to save:  
 
 ```bash
 python pdfcrop.py -i input.pdf --page 1
@@ -66,6 +68,15 @@ Use Ctrl + Z to undo crop.
 - `--page N`: 1‑based page index (required)
 - Selections always export as `1.png`, `2.png` ...
 - Zoom level is now read from the `PDFCROP_ZOOM_LEVEL` environment variable (set in `.env`; default 2).
+
+
+3. excelpdf.py  
+
+Convert Excel to PDFs, one sheet one PDF file.  
+
+```bash
+python excelpdf.py -i input.xslx
+```
 
 
 Notes
