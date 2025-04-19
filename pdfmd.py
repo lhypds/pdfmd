@@ -1,10 +1,8 @@
 #!/usr/bin/env python
 import os
 import time
-import json
 import requests
 import click
-import glob  # for cleanup of temporary files
 from dotenv import load_dotenv  # load .env for environment variables
 from utils.aws_utils import upload_and_verify_pdf
 import subprocess
