@@ -114,8 +114,12 @@ def select_and_redact(
     # Apply all redactions
     page.apply_redactions()
 
-    doc.save(out_pdf)
-    doc.close()
+    # Create a new PDF with only the redacted page
+    new_doc = fitz.open()  # Create a new empty PDF
+    new_doc.insert_pdf(doc, from_page=page_index - 1, to_page=page_index - 1)
+    new_doc.save(out_pdf)
+    new_doc.close()
+    doc.close()  # Close the original document
     print(f"✓  Redacted page saved to {out_pdf}")
     return img_paths
 
@@ -134,7 +138,7 @@ def main_cli():
     args = parser.parse_args()
     # Always derive redacted PDF output path from input basename
     base = os.path.splitext(os.path.basename(args.input_pdf))[0]
-    output_pdf = f"{base}_pdfcrop.pdf"
+    output_pdf = f"{base}_pdfcrop_{args.page}.pdf"
     # read zoom level from environment
     try:
         zoom = float(os.getenv("PDFCROP_ZOOM_LEVEL", "2"))
