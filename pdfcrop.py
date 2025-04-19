@@ -72,12 +72,10 @@ def select_and_redact(
     cropped = img.crop((x0, y0, x1, y1))
     cropped.save(out_img, "PNG")
 
-    # 4 Paint white rectangle in the PDF (convert px → PDF pts via zoom)
+    # 4 Remove all content in selection and paint white rectangle (redaction)
     rect_pdf = fitz.Rect(x0 / zoom, y0 / zoom, x1 / zoom, y1 / zoom)
-    shape = page.new_shape()
-    shape.draw_rect(rect_pdf)
-    shape.finish(fill=(1, 1, 1))  # opaque white
-    shape.commit()
+    page.add_redact_annot(rect_pdf, fill=(1, 1, 1))  # mark area for redaction
+    page.apply_redactions()  # remove underlying content and apply white fill
 
     doc.save(out_pdf)
     doc.close()
