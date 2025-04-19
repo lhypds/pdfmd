@@ -53,18 +53,11 @@ def main(input_path, crop):
         base, _ = os.path.splitext(input_path)
         cropped_pdf = f"{base}_pdfcrop.pdf"
         click.echo(f"[INFO] Launching external crop tool: pdfcrop.py -i {input_path}")
-        # load zoom level from environment
-        try:
-            zoom = float(os.getenv("PDFCROP_ZOOM_LEVEL", "2"))
-        except ValueError:
-            zoom = 2.0
         cmd = [
             sys.executable,
             os.path.join(os.path.dirname(__file__), "pdfcrop.py"),
             "-i",
             input_path,
-            "--zoom",
-            str(zoom),
         ]
         # capture output with UTF-8 decoding to handle Unicode properly on Windows
         result = subprocess.run(
