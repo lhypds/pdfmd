@@ -10,6 +10,7 @@ import glob
 import tkinter as tk
 from PIL import Image, ImageTk
 from dotenv import load_dotenv
+import shutil  # for copying original PDF when no crop
 
 # ensure the Windows console uses UTF-8 so Unicode symbols like ✓ and Japanese text can print
 if sys.platform.startswith("win"):
@@ -108,8 +109,10 @@ def select_and_redact(
     root.destroy()
 
     if not selections:
-        print("No area selected; exiting.")
-        return
+        print("No area selected; exporting original PDF.")
+        shutil.copy(pdf_path, out_pdf)
+        print(f"✓  Exported original PDF to {out_pdf}")
+        return []
 
     # Save crops (unless skipped) and collect rects for redaction
     for idx, (x0, y0, x1, y1, skip_png, _rect_id) in enumerate(selections, start=1):
