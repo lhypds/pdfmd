@@ -35,13 +35,13 @@ Setup
 Usage
 -----
 
-Split, crop PDF and convert to Markdown:  
+Crop remove images in PDF (and save) and convert to Markdown:  
 
 ```bash
 python main.py -i input.pdf -c
 ```
 
-- `-c` for enable crop.  
+- `-c` for enable crop, if no image in file no need crop.  
 - `-i` can be multiple files, and can be a folder (will loop files in folder).  
 - The output will be a Markdown file with many PNG files.  
 - This can be used as generative AI's input.  
