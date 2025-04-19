@@ -1,8 +1,12 @@
-# PDF to Markdown Converter
+
+pdfmd
+=====
 
 This tool converts a PDF into Markdown text and tables using Azure AI Document Intelligence.
 
-## Setup
+
+Setup
+-----
 
 1. Create a virtual environment and activate it:
 
@@ -25,7 +29,9 @@ This tool converts a PDF into Markdown text and tables using Azure AI Document I
    AZURE_API_KEY=<your-key>
    ```
 
-## Usage
+
+Usage
+-----
 
 Convert a PDF to Markdown:
 
@@ -33,6 +39,9 @@ Convert a PDF to Markdown:
 python pdfmd.py -i input.pdf -o output.md
 ```
 
-## Notes
+
+Notes
+-----
+
 - Progress bar is displayed during analysis.
 - Requires an Azure Document Intelligence resource with the `prebuilt-layout` model.
