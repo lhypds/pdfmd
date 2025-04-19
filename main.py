@@ -115,9 +115,9 @@ def main(input_pdfs, crop):
                     first_try = False
                 else:
                     click.echo(
-                        f"[INFO] Converting {pdf} to Markdown... (waiting 30s to avoid rate limit)"
+                        f"[INFO] Converting {pdf} to Markdown... (waiting 15s to avoid rate limit)"
                     )
-                    sleep(30)
+                    sleep(15)
                 md_cmd = [
                     sys.executable,
                     os.path.join(scripts_dir, "pdfmd.py"),
