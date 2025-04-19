@@ -9,11 +9,14 @@ import fitz  # PyMuPDF
 import glob
 import tkinter as tk
 from PIL import Image, ImageTk
+from dotenv import load_dotenv
 
 # ensure the Windows console uses UTF-8 so Unicode symbols like ✓ and Japanese text can print
 if sys.platform.startswith("win"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
+load_dotenv()
 
 
 def select_and_redact(
@@ -127,18 +130,20 @@ def main_cli():
     parser.add_argument(
         "--page", type=int, default=0, help="Page index (0-based) to crop, default 0"
     )
-    parser.add_argument(
-        "--zoom", type=float, default=2.0, help="Zoom factor for rendering, default 2.0"
-    )
     args = parser.parse_args()
     # Always derive redacted PDF output path from input basename
     base = os.path.splitext(os.path.basename(args.input_pdf))[0]
     output_pdf = f"{base}_pdfcrop.pdf"
+    # read zoom level from environment
+    try:
+        zoom = float(os.getenv("PDFCROP_ZOOM_LEVEL", "2"))
+    except ValueError:
+        zoom = 2.0
     select_and_redact(
         args.input_pdf,
         output_pdf,
         args.page,
-        args.zoom,
+        zoom,
     )
 
 

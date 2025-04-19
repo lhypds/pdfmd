@@ -39,14 +39,7 @@ AWS_S3_BUCKET = os.getenv("AWS_S3_BUCKET")
     default=False,
     help="Crop PDF image area before processing",
 )
-@click.option(
-    "--zoom",
-    "zoom",
-    default=2.0,
-    type=float,
-    help="Zoom factor for cropping (only relevant with -c; default: 2.0)",
-)
-def main(input_path, crop, zoom):
+def main(input_path, crop):
     click.echo("[INFO] Starting PDF to Markdown conversion...")
     # initialize list for any cropped images
     img_paths = []
@@ -60,6 +53,11 @@ def main(input_path, crop, zoom):
         base, _ = os.path.splitext(input_path)
         cropped_pdf = f"{base}_pdfcrop.pdf"
         click.echo(f"[INFO] Launching external crop tool: pdfcrop.py -i {input_path}")
+        # load zoom level from environment
+        try:
+            zoom = float(os.getenv("PDFCROP_ZOOM_LEVEL", "2"))
+        except ValueError:
+            zoom = 2.0
         cmd = [
             sys.executable,
             os.path.join(os.path.dirname(__file__), "pdfcrop.py"),

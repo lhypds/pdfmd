@@ -28,6 +28,7 @@ Setup
    AWS_S3_BUCKET=<your-bucket-name>
    AWS_ACCESS_KEY_ID=<your-aws-access-key-id>
    AWS_SECRET_ACCESS_KEY=<your-aws-secret-access-key>
+   PDFCROP_ZOOM_LEVEL=2
    ```
 
 
@@ -37,30 +38,29 @@ Usage
 Convert a PDF to Markdown:
 
 ```bash
-python pdfmd.py -i input.pdf [-c [--zoom Z]]
+python pdfmd.py -i input.pdf [-c]
 ```
-- `--zoom Z`: only applies when `-c/--crop` is specified; controls the rendering zoom factor for cropping (default: 2.0).
 
 Cropping Option  
 Use `-c, --crop` to interactively select and redact areas before conversion:
 
 ```bash
-python pdfmd.py -i input.pdf -c [--zoom Z]
+python pdfmd.py -i input.pdf -c
 ```
 - Selections are exported as numbered PNGs (`1.png`, `2.png`, …).
 - The redacted PDF used for conversion is `<input_basename>_pdfcrop.pdf`.
-- The preview defaults to 2× zoom (render ~144 dpi). Pass `--zoom <factor>` (e.g. `--zoom 3.0`) alongside `-c` to adjust rendering resolution.
+- Zoom level is now read from the `PDFCROP_ZOOM_LEVEL` environment variable (set in `.env`; default 2).
 
 Standalone Crop Tool
 
 Run `pdfcrop.py` independently to select, crop, and redact:
 ```bash
-python pdfcrop.py -i input.pdf [--page N] [--zoom Z]
+python pdfcrop.py -i input.pdf [--page N]
 ```
 - `-i/--input`: source PDF (required)
 - Selections always export as `1.png`, `2.png`, …
 - `--page N`: zero‑based page index (default: 0, rarely used)
-- `--zoom Z`: rendering zoom factor (default: 2.0)
+- Zoom level is now read from the `PDFCROP_ZOOM_LEVEL` environment variable (set in `.env`; default 2).
 
 Splitting Tool
 
