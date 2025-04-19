@@ -7,7 +7,8 @@ import click
 import glob  # for cleanup of temporary files
 from dotenv import load_dotenv  # load .env for environment variables
 from utils.aws_utils import upload_and_verify_pdf
-from pdfcrop import select_and_redact
+import subprocess
+import sys
 
 load_dotenv()
 from rich.progress import (
@@ -51,9 +52,28 @@ def main(input_path, crop):
     if crop:
         base, _ = os.path.splitext(input_path)
         cropped_pdf = f"{base}_pdfcrop.pdf"
-        cropped_img = f"{base}_crop.png"
-        click.echo(f"[INFO] Cropping PDF: {input_path} -> {cropped_pdf}")
-        img_paths = select_and_redact(input_path, cropped_pdf, cropped_img)
+        click.echo(f"[INFO] Launching external crop tool: pdfcrop.py -i {input_path}")
+        # execute pdfcrop.py CLI with explicit output path
+        cmd = [
+            sys.executable,
+            os.path.join(os.path.dirname(__file__), "pdfcrop.py"),
+            "-i",
+            input_path,
+        ]
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        if result.returncode != 0:
+            click.echo(result.stderr)
+            sys.exit(result.returncode)
+        click.echo(result.stdout)
+        # wait up to 5s for the cropped PDF to appear
+        timeout = 5
+        elapsed = 0
+        while not os.path.exists(cropped_pdf) and elapsed < timeout:
+            time.sleep(0.5)
+            elapsed += 0.5
+        if not os.path.exists(cropped_pdf):
+            click.echo(f"[ERROR] Cropped PDF not found after wait: {cropped_pdf}")
+            sys.exit(1)
         click.echo(f"[INFO] Using cropped PDF for processing: {cropped_pdf}")
         input_path = cropped_pdf
     if not AZURE_ENDPOINT or not AZURE_API_KEY:

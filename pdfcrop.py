@@ -10,14 +10,18 @@ import glob
 import tkinter as tk
 from PIL import Image, ImageTk
 
+# ensure the Windows console uses UTF-8 so Unicode symbols like ✓ and Japanese text can print
+if sys.platform.startswith("win"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
 
 def select_and_redact(
-    pdf_path: str, out_pdf: str, out_img: str, page_index: int = 0, zoom: float = 2.0
+    pdf_path: str, out_pdf: str, page_index: int = 0, zoom: float = 2.0
 ) -> None:
     """
     1. Renders page_index with the given zoom.
     2. Opens a Tk window to let the user draw a rectangle.
-    3. Saves the cropped selection as out_img (PNG).
     4. Draws an opaque white rectangle in the PDF and saves out_pdf.
     """
     # Cleanup previous redacted PDF and cropped PNGs (images named 1.png, 2.png, ...)
@@ -121,30 +125,18 @@ def main_cli():
         "-i", "--input", dest="input_pdf", required=True, help="Input PDF file path"
     )
     parser.add_argument(
-        "-o",
-        "--output",
-        dest="output_pdf",
-        help="Output (redacted) PDF file path; defaults to '<input_basename>_pdfcrop.pdf'",
-        default=None,
-    )
-    parser.add_argument(
         "--page", type=int, default=0, help="Page index (0-based) to crop, default 0"
     )
     parser.add_argument(
         "--zoom", type=float, default=2.0, help="Zoom factor for rendering, default 2.0"
     )
     args = parser.parse_args()
-    # Derive default output PDF if not provided
-    if not args.output_pdf:
-        base = os.path.splitext(os.path.basename(args.input_pdf))[0]
-        args.output_pdf = f"{base}_pdfcrop.pdf"
-    # Derive base image name for PNG exports
+    # Always derive redacted PDF output path from input basename
     base = os.path.splitext(os.path.basename(args.input_pdf))[0]
-    base_img = f"{base}_crop.png"
+    output_pdf = f"{base}_pdfcrop.pdf"
     select_and_redact(
         args.input_pdf,
-        args.output_pdf,
-        base_img,
+        output_pdf,
         args.page,
         args.zoom,
     )
