@@ -41,6 +41,12 @@ Split, crop PDF and convert to Markdown:
 python main.py -i input.pdf -c
 ```
 
+- `-c` for enable crop.  
+- The output will be a Markdown file with many PNG files.  
+- This can be used as generative AI's input.  
+
+Modules
+
 1. pdfmd.py  
 
 Input file must be single page PDF, if it is multiple pages, it will only process the first page.
@@ -56,23 +62,23 @@ Output file (single): `<input_basename>_pdfmd.md`
 
 2. pdfcrop.py  
 
-Crop area to remove (press Ctrl) or corp to both remove and save as PNG:  
+Crop area to remove (press Ctrl) or corp to both remove and save as PNG, output crop removed PDF:  
 
 ```bash
 python pdfcrop.py -i input.pdf --page 1
 ```
 
-It will popup a window let user crop areas, if crop it will delete the area and save as <page>_<crop_id>.png.  
-If use Ctrl will just delete the area, this can be used to remove unnecessary part.  
+It will popup a window let user crop areas, if crop it will remove the area and save as PNG.  
+If use Ctrl will just delete the area. This can be used to remove unnecessary part in PDF.  
 Use Ctrl + Z to undo crop.  
 Crop output is single page PDF.  
 
 - `-i/--input`: source PDF (required)  
 - `--page N`: 1‑based page index (required)  
-- Selections always export as `1.png`, `2.png` ...  
 - Zoom level is now read from the `PDFCROP_ZOOM_LEVEL` environment variable (set in `.env`; default 2).  
 
-Output file (single): `<input_basename>_pdfcrop_<page>.pdf`  
+Output PDF file (single): `<input_basename>_pdfcrop_<page>.pdf`  
+Output PNG files (multiple): `<input_basename>_pdfcrop_<page>_<index>.png`  
 
 3. excelpdf.py  
 
