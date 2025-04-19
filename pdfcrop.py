@@ -56,8 +56,10 @@ def select_and_redact(
         sel["x1"], sel["y1"] = event.x, event.y
         # normalize coords and store selection
         x0, y0, x1, y1 = map(int, (sel["x0"], sel["y0"], sel["x1"], sel["y1"]))
-        if x0 > x1: x0, x1 = x1, x0
-        if y0 > y1: y0, y1 = y1, y0
+        if x0 > x1:
+            x0, x1 = x1, x0
+        if y0 > y1:
+            y0, y1 = y1, y0
         selections.append((x0, y0, x1, y1))
 
     # Bind mouse events for drawing rectangles
@@ -68,7 +70,8 @@ def select_and_redact(
     # bind finish key
     def on_done(event):
         root.quit()
-    root.bind('<Return>', on_done)
+
+    root.bind("<Return>", on_done)
     root.mainloop()  # Blocks until Enter pressed
     root.destroy()
 
@@ -78,7 +81,7 @@ def select_and_redact(
 
     # Prepare base for image outputs
     base_img = out_img
-    if base_img.lower().endswith('.png'):
+    if base_img.lower().endswith(".png"):
         base_img = base_img[:-4]
 
     # Process each selection: save crop and mark redaction
