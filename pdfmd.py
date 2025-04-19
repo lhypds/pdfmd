@@ -137,7 +137,9 @@ def main(input_path):
             grid = [["" for _ in range(cols)] for _ in range(rows)]
             for cell in obj.get("cells", []):
                 r, c = cell.get("rowIndex"), cell.get("columnIndex")
-                grid[r][c] = cell.get("content", "").strip()
+                # normalize content: replace newlines with spaces, then strip
+                content = cell.get("content", "").replace("\n", " ").strip()
+                grid[r][c] = content
             md.append("| " + " | ".join(grid[0]) + " |")
             md.append("| " + " | ".join(["---"] * cols) + " |")
             for row in grid[1:]:
