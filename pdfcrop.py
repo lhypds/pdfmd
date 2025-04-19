@@ -98,8 +98,6 @@ def select_and_redact(
         print("No area selected; exiting.")
         return
 
-    # No base prefix for images; name them simply '1.png', '2.png', ...
-
     # Process each selection: save crop and mark redaction
     for idx, (x0, y0, x1, y1) in enumerate(selections, start=1):
         # Save cropped selection as PNG
