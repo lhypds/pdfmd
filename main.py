@@ -137,7 +137,7 @@ def main(input_pdfs, crop):
         # Phase 3: combine Markdown files
         # Confirm before proceeding to Phase 3
         if click.confirm(
-            f"[CONFIRM] Phase 2 complete. Proceed to Phase 3: combine Markdown files for {input_pdf}?",
+            f"[CONFIRM] Proceed to Phase 3: combine Markdown files for {input_pdf}?",
             default=True,
         ):
             click.echo("[INFO] Phase 3: combining Markdown files...")
