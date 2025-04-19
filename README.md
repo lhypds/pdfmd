@@ -59,6 +59,7 @@ python pdfcrop.py -i input.pdf --page 1
 
 It will popup a window let user crop areas, if crop it will delete the area and save as <page>_<crop_id>.png.
 If use Ctrl will just delete the area, this can be used to remove unnecessary part.
+Use Ctrl + Z to undo crop.
 
 - `-i/--input`: source PDF (required)
 - `--page N`: 1‑based page index (required)

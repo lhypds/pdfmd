@@ -82,8 +82,8 @@ def select_and_redact(
             x0, x1 = x1, x0
         if y0 > y1:
             y0, y1 = y1, y0
-        # include skip flag for PNG
-        selections.append((x0, y0, x1, y1, sel.get("skip_png", False)))
+        # include skip flag and canvas rect ID for PNG
+        selections.append((x0, y0, x1, y1, sel.get("skip_png", False), sel["rect"]))
 
     # Bind mouse events for drawing rectangles
     canvas.bind("<ButtonPress-1>", on_press)
@@ -95,6 +95,15 @@ def select_and_redact(
         root.quit()
 
     root.bind("<Return>", on_done)
+
+    # Bind Ctrl+Z to undo last selection
+    def on_undo(event):
+        if selections:
+            x0, y0, x1, y1, skip, rect_id = selections.pop()
+            canvas.delete(rect_id)
+            print(f"↩️  Undid selection at ({x0},{y0})-({x1},{y1})")
+
+    root.bind("<Control-z>", on_undo)
     root.mainloop()  # Blocks until Enter pressed
     root.destroy()
 
@@ -103,7 +112,7 @@ def select_and_redact(
         return
 
     # Save crops (unless skipped) and collect rects for redaction
-    for idx, (x0, y0, x1, y1, skip_png) in enumerate(selections, start=1):
+    for idx, (x0, y0, x1, y1, skip_png, _rect_id) in enumerate(selections, start=1):
         if not skip_png:
             cropped = img.crop((x0, y0, x1, y1))
             img_path = f"{page_index}_{idx}.png"
@@ -116,7 +125,7 @@ def select_and_redact(
     new_doc.insert_pdf(doc, from_page=page_index - 1, to_page=page_index - 1)
     new_page = new_doc[0]
     # Add redact annotations for each selected rect, then remove underlying content
-    for x0, y0, x1, y1, _skip_png in selections:
+    for x0, y0, x1, y1, _skip_png, _rect_id in selections:
         rect_pdf = fitz.Rect(x0 / zoom, y0 / zoom, x1 / zoom, y1 / zoom)
         new_page.add_redact_annot(rect_pdf, fill=(1, 1, 1))
     new_page.apply_redactions()
