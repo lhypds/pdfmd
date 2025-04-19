@@ -5,6 +5,7 @@ import subprocess
 import click
 import fitz
 import glob
+import re  # for sorting markdown files
 
 
 @click.command()
@@ -39,6 +40,7 @@ def main(input_pdf, crop):
         doc.close()
         click.echo(f"[INFO] PDF has {num_pages} pages.")
         cropped_pdfs = []
+
         # Phase 1: crop pages
         for i in range(1, num_pages + 1):
             click.echo(f"[INFO] Cropping page {i} via pdfcrop.py...")
@@ -54,6 +56,14 @@ def main(input_pdf, crop):
             # pdfcrop.py already names output as <base>_pdfcrop_<page>.pdf
             out_pdf = f"{base}_pdfcrop_{i}.pdf"
             cropped_pdfs.append(out_pdf)
+
+        # Confirm before proceeding to Phase 2
+        if not click.confirm(
+            "[CONFIRM] Proceed to Phase 2: convert cropped PDFs to Markdown?",
+            default=True,
+        ):
+            click.echo("[ABORT] Phase 2 cancelled. Exiting.")
+            sys.exit(0)
         click.echo("[INFO] Phase 2: converting cropped PDFs to Markdown...")
         for pdf in cropped_pdfs:
             click.echo(f"[INFO] Converting {pdf} to Markdown...")
@@ -64,6 +74,28 @@ def main(input_pdf, crop):
                 pdf,
             ]
             subprocess.run(md_cmd, check=True)
+
+        # Confirm before proceeding to Phase 3
+        if click.confirm(
+            "[CONFIRM] Phase 2 complete. Proceed to Phase 3: combine Markdown files?",
+            default=True,
+        ):
+            click.echo("[INFO] Phase 3: combining Markdown files...")
+            # collect and sort markdown files by page index
+            md_files = sorted(
+                glob.glob("*_pdfmd.md"),
+                key=lambda x: int(re.search(r"_pdfcrop_(\d+)_pdfmd\.md$", x).group(1)),
+            )
+            combined = f"{base}_combined.md"
+            with open(combined, "w", encoding="utf-8") as fout:
+                for md in md_files:
+                    click.echo(f"[INFO] Adding {md} to {combined}")
+                    with open(md, "r", encoding="utf-8") as fin:
+                        fout.write(fin.read())
+                        fout.write("\n\n")
+            click.echo(f"[INFO] Combined Markdown saved as {combined}")
+        else:
+            click.echo("[INFO] Phase 3 skipped.")
     else:
         click.echo(f"[INFO] Converting {input_pdf} to Markdown...")
         md_cmd = [
