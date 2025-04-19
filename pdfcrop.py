@@ -20,11 +20,10 @@ def select_and_redact(
     3. Saves the cropped selection as out_img (PNG).
     4. Draws an opaque white rectangle in the PDF and saves out_pdf.
     """
-    # Cleanup previous redacted PDF and cropped PNGs
-    base_name = os.path.splitext(os.path.basename(pdf_path))[0]
+    # Cleanup previous redacted PDF and cropped PNGs (images named 1.png, 2.png, ...)
     if os.path.exists(out_pdf):
         os.remove(out_pdf)
-    for old in glob.glob(f"{base_name}_crop_*.png"):
+    for old in glob.glob("[0-9]*.png"):
         os.remove(old)
 
     doc = fitz.open(pdf_path)
@@ -89,16 +88,13 @@ def select_and_redact(
         print("No area selected; exiting.")
         return
 
-    # Prepare base for image outputs
-    base_img = out_img
-    if base_img.lower().endswith(".png"):
-        base_img = base_img[:-4]
+    # No base prefix for images; name them simply '1.png', '2.png', ...
 
     # Process each selection: save crop and mark redaction
     for idx, (x0, y0, x1, y1) in enumerate(selections, start=1):
         # Save cropped selection as PNG
         cropped = img.crop((x0, y0, x1, y1))
-        img_path = f"{base_img}_{idx}.png"
+        img_path = f"{idx}.png"
         cropped.save(img_path, "PNG")
         print(f"✓  Cropped image exported to {img_path}")
         # Mark for redaction

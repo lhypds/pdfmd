@@ -4,6 +4,7 @@ import time
 import json
 import requests
 import click
+import glob  # for cleanup of temporary files
 from dotenv import load_dotenv  # load .env for environment variables
 from utils.aws_utils import upload_and_verify_pdf
 from pdfcrop import select_and_redact
@@ -168,6 +169,11 @@ def main(input_path, output_path, crop):
     # write markdown to derived output path
     with open(output_path, "w", encoding="utf-8") as f:
         f.write("\n".join(md))
+    # Cleanup temporary crop files if used
+    if crop:
+        # remove temporary cropped PDF (retain crop PNGs)
+        if os.path.exists(cropped_pdf):
+            os.remove(cropped_pdf)
 
 
 if __name__ == "__main__":
