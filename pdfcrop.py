@@ -31,7 +31,7 @@ def select_and_redact(
     4. Draws an opaque white rectangle in the PDF and saves out_pdf.
     """
     # cleanup previous output files
-    for old in glob.glob(f"{base_name}_pdfcrop_*"):
+    for old in glob.glob(f"{base_name}_pdfcrop_{page_index}_*"):
         os.remove(old)
 
     # store paths of all cropped images

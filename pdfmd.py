@@ -28,7 +28,13 @@ AWS_S3_BUCKET = os.getenv("AWS_S3_BUCKET")
 
 
 @click.command()
-@click.option("-i", "--input", "input_path", required=True, help="Input PDF file path")
+@click.option(
+    "-i",
+    "--input",
+    "input_path",
+    required=True,
+    help="Input PDF file path",
+)
 def main(input_path):
     click.echo("[INFO] Starting PDF to Markdown conversion...")
 
