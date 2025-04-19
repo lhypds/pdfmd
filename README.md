@@ -60,15 +60,15 @@ Crop to remove (Ctrl) or corp to save:
 python pdfcrop.py -i input.pdf --page 1
 ```
 
-It will popup a window let user crop areas, if crop it will delete the area and save as <page>_<crop_id>.png.
-If use Ctrl will just delete the area, this can be used to remove unnecessary part.
-Use Ctrl + Z to undo crop.
+It will popup a window let user crop areas, if crop it will delete the area and save as <page>_<crop_id>.png.  
+If use Ctrl will just delete the area, this can be used to remove unnecessary part.  
+Use Ctrl + Z to undo crop.  
+Crop output is single page PDF.  
 
-- `-i/--input`: source PDF (required)
-- `--page N`: 1‑based page index (required)
-- Selections always export as `1.png`, `2.png` ...
-- Zoom level is now read from the `PDFCROP_ZOOM_LEVEL` environment variable (set in `.env`; default 2).
-
+- `-i/--input`: source PDF (required)  
+- `--page N`: 1‑based page index (required)  
+- Selections always export as `1.png`, `2.png` ...  
+- Zoom level is now read from the `PDFCROP_ZOOM_LEVEL` environment variable (set in `.env`; default 2).  
 
 3. excelpdf.py  
 
@@ -77,6 +77,19 @@ Convert Excel to PDFs, one sheet one PDF file.
 ```bash
 python excelpdf.py -i input.xslx
 ```
+
+4. pdfsplit.py
+
+Splitting Tool
+
+Run `pdfsplit.py` to split each page of a PDF into its own file:
+```bash
+python pdfsplit.py -i input.pdf
+```
+
+- `-i/--input`: source PDF file path (required)
+- Outputs `<input_basename>_pdfsplit_1.pdf`, `<input_basename>_pdfsplit_2.pdf`, …
+
 
 
 Notes
