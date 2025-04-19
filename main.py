@@ -30,6 +30,7 @@ def main(input_pdfs, crop):
     """Crop all pages (if requested) then convert to Markdown for multiple PDFs or folders."""
     # Expand input_pdfs: if any entry is a directory, add all PDFs in that directory
     expanded_inputs = []
+
     for inp in input_pdfs:
         if os.path.isdir(inp):
             pdfs = sorted(glob.glob(os.path.join(inp, "*.pdf")))
@@ -38,21 +39,12 @@ def main(input_pdfs, crop):
             expanded_inputs.extend(pdfs)
         else:
             expanded_inputs.append(inp)
+
     for input_pdf in expanded_inputs:
         click.echo(f"[INFO] Processing: {input_pdf}")
-        # Cleanup previous output files
-        click.echo("[INFO] Cleaning up previous output files...")
-        cleanup_patterns = ["*.png", "*_pdfcrop_*.pdf", "*_pdfmd.md"]
-        for pattern in cleanup_patterns:
-            for f in glob.glob(pattern):
-                try:
-                    os.remove(f)
-                    click.echo(f"  Removed: {f}")
-                except OSError as e:
-                    click.echo(f"  Error removing {f}: {e}", err=True)
-
         base = os.path.splitext(os.path.basename(input_pdf))[0]
         scripts_dir = os.path.dirname(__file__)
+
         if crop:
             click.echo("[INFO] Counting pages via PyMuPDF...")
             doc = fitz.open(input_pdf)
