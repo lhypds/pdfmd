@@ -95,7 +95,13 @@ def main(input_pdf, crop):
                 for md in md_files:
                     click.echo(f"[INFO] Adding {md} to {combined}")
                     with open(md, "r", encoding="utf-8") as fin:
-                        fout.write(fin.read())
+                        fcontent = fin.read()
+
+                        # Trim some unnecessarey text
+                        # Remove ":unselected:" and ":selected:"
+                        fcontent = re.sub(r":unselected:|:selected:", "", fcontent)
+
+                        fout.write(fcontent)
                         fout.write("\n\n")
             click.echo(f"[INFO] Combined Markdown saved as {combined}")
 
