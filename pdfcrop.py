@@ -3,6 +3,7 @@ Redact a user‑selected area in page 1 of a PDF and export the selection as PNG
 """
 
 import sys
+import argparse
 import fitz  # PyMuPDF
 import tkinter as tk
 from PIL import Image, ImageTk
@@ -102,8 +103,28 @@ def select_and_redact(
     print(f"✓  Redacted page saved to {out_pdf}")
 
 
+# Command-line interface
+def main_cli():
+    parser = argparse.ArgumentParser(
+        description="Crop and redact regions of a PDF and export selections as PNG"
+    )
+    parser.add_argument("input_pdf", help="Input PDF file path")
+    parser.add_argument("output_pdf", help="Output (redacted) PDF file path")
+    parser.add_argument(
+        "base_img",
+        help="Base filename for cropped PNG exports (e.g. 'crop.png' yields 'crop_1.png', etc.)",
+    )
+    parser.add_argument(
+        "--page", type=int, default=0, help="Page index (0-based) to crop, default 0"
+    )
+    parser.add_argument(
+        "--zoom", type=float, default=2.0, help="Zoom factor for rendering, default 2.0"
+    )
+    args = parser.parse_args()
+    select_and_redact(
+        args.input_pdf, args.output_pdf, args.base_img, args.page, args.zoom
+    )
+
+
 if __name__ == "__main__":
-    if len(sys.argv) != 4:
-        print("Usage:  python redact_crop.py  input.pdf  output.pdf  cropped.png")
-        sys.exit(1)
-    select_and_redact(*sys.argv[1:])
+    main_cli()
