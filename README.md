@@ -1,7 +1,9 @@
+![ChatGPT Image Apr 20, 2025, 05_19_22 AM](https://github.com/user-attachments/assets/a701d46a-5c8b-4246-946f-6c67992f60c0)
+
 pdfmd
 =====
 
-This tool converts a PDF into Markdown text and tables using Azure AI Document Intelligence.
+This tool uses Azure AI Document Intelligence to extract and convert text and tables from PDFs into Markdown, and crops images within the PDF—all optimized for input into generative AI systems.
 
 
 Setup
