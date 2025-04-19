@@ -90,7 +90,7 @@ def main(input_pdf, crop):
                 glob.glob("*_pdfmd.md"),
                 key=lambda x: int(re.search(r"_pdfcrop_(\d+)_pdfmd\.md$", x).group(1)),
             )
-            combined = f"{base}_combined.md"
+            combined = f"{base}_pdfmd.md"
             with open(combined, "w", encoding="utf-8") as fout:
                 for md in md_files:
                     click.echo(f"[INFO] Adding {md} to {combined}")
