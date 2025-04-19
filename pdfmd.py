@@ -4,8 +4,8 @@ import time
 import json
 import requests
 import click
-import boto3  # AWS S3 client
 from dotenv import load_dotenv  # load .env for environment variables
+from utils.aws_utils import upload_and_verify_pdf
 
 load_dotenv()
 from rich.progress import (
@@ -45,26 +45,8 @@ def main(input_path, output_path):
         click.echo("[ERROR] AWS_S3_BUCKET environment variable must be set.")
         return
 
-    # upload PDF to S3
-    click.echo(f"[INFO] Uploading {input_path} to S3 bucket {AWS_S3_BUCKET}...")
-    s3 = boto3.client("s3")
-    key = os.path.basename(input_path)
-    s3.upload_file(input_path, AWS_S3_BUCKET, key)
-    # generate presigned URL for the uploaded PDF
-    pdf_url = s3.generate_presigned_url(
-        "get_object", Params={"Bucket": AWS_S3_BUCKET, "Key": key}, ExpiresIn=3600
-    )
-    click.echo(f"[INFO] Uploaded PDF URL: {pdf_url}")
-
-    click.echo("[INFO] Verifying uploaded PDF URL accessibility via GET...")
-    try:
-        resp = requests.get(pdf_url, stream=True)
-        resp.raise_for_status()
-        click.echo("[INFO] PDF URL is accessible.")
-        resp.close()
-    except Exception as e:
-        click.echo(f"[ERROR] Unable to access PDF URL: {e}")
-        return
+    # upload and verify PDF on S3
+    pdf_url = upload_and_verify_pdf(input_path, AWS_S3_BUCKET)
 
     # analyze via URL source
     analyze_url = f"{AZURE_ENDPOINT}/documentintelligence/documentModels/{MODEL_ID}:analyze?_overload=analyzeDocument&api-version={API_VERSION}"
