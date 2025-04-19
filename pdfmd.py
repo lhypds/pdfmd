@@ -92,35 +92,50 @@ def main(input_path, output_path):
     click.echo("[INFO] Parsing analysis result...")
     analyze_result = result.get("analyzeResult", {})
     md = []
-
-    # paragraphs
-    paragraphs = analyze_result.get("paragraphs", [])
-    for p in paragraphs:
-        text = p.get("content", "").strip()
-        if text:
-            md.append(text)
+    raw_paragraphs = analyze_result.get("paragraphs", [])
+    raw_tables = analyze_result.get("tables", [])
+    # identify paragraphs included in tables
+    table_para_idxs = set()
+    for t in raw_tables:
+        for cell in t.get("cells", []):
+            for elem in cell.get("elements", []):
+                if elem.startswith("/paragraphs/"):
+                    table_para_idxs.add(int(elem.split("/")[-1]))
+    # build items list (paragraphs + tables) with positions
+    items = []
+    for idx, p in enumerate(raw_paragraphs):
+        if idx in table_para_idxs:
+            continue
+        br = p.get("boundingRegions", [{}])[0]
+        pg = br.get("pageNumber", 0)
+        poly = br.get("polygon", [0, 0])
+        items.append((pg, poly[1], poly[0], "para", p))
+    for t in raw_tables:
+        br = t.get("boundingRegions", [{}])[0]
+        pg = br.get("pageNumber", 0)
+        poly = br.get("polygon", [0, 0])
+        items.append((pg, poly[1], poly[0], "table", t))
+    # sort combined items
+    items.sort(key=lambda x: (x[0], x[1], x[2]))
+    # emit in order
+    for _, _, _, kind, obj in items:
+        if kind == "para":
+            text = obj.get("content", "").strip()
+            if text:
+                md.append(text)
+                md.append("")
+        else:  # table
+            rows = obj.get("rowCount", 0)
+            cols = obj.get("columnCount", 0)
+            grid = [["" for _ in range(cols)] for _ in range(rows)]
+            for cell in obj.get("cells", []):
+                r, c = cell.get("rowIndex"), cell.get("columnIndex")
+                grid[r][c] = cell.get("content", "").strip()
+            md.append("| " + " | ".join(grid[0]) + " |")
+            md.append("| " + " | ".join(["---"] * cols) + " |")
+            for row in grid[1:]:
+                md.append("| " + " | ".join(row) + " |")
             md.append("")
-
-    # tables
-    tables = analyze_result.get("tables", [])
-    for table in tables:
-        rows = table.get("rowCount", 0)
-        cols = table.get("columnCount", 0)
-        # initialize empty table grid
-        grid = [["" for _ in range(cols)] for _ in range(rows)]
-        for cell in table.get("cells", []):
-            r = cell.get("rowIndex")
-            c = cell.get("columnIndex")
-            content = cell.get("content", "").strip()
-            grid[r][c] = content
-        # header row
-        header = "| " + " | ".join(grid[0]) + " |"
-        separator = "| " + " | ".join(["---"] * cols) + " |"
-        md.append(header)
-        md.append(separator)
-        for row in grid[1:]:
-            md.append("| " + " | ".join(row) + " |")
-        md.append("")
 
     # write markdown
     with open(output_path, "w", encoding="utf-8") as f:

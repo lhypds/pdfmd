@@ -12,7 +12,7 @@ def upload_and_verify_pdf(input_path: str, bucket: str, expiration: int = 3600) 
     key = os.path.basename(input_path)
     s3.upload_file(input_path, bucket, key)
     pdf_url = s3.generate_presigned_url(
-        'get_object', Params={'Bucket': bucket, 'Key': key}, ExpiresIn=expiration
+        "get_object", Params={"Bucket": bucket, "Key": key}, ExpiresIn=expiration
     )
     click.echo(f"[INFO] Uploaded PDF URL: {pdf_url}")
     click.echo("[INFO] Verifying uploaded PDF URL accessibility via GET...")
