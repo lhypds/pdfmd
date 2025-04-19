@@ -20,7 +20,7 @@ load_dotenv()
 
 
 def select_and_redact(
-    pdf_path: str, out_pdf: str, page_index: int = 0, zoom: float = 2.0
+    pdf_path: str, out_pdf: str, page_index: int = 1, zoom: float = 2.0
 ) -> None:
     """
     1. Renders page_index with the given zoom.
@@ -30,13 +30,14 @@ def select_and_redact(
     # Cleanup previous redacted PDF and cropped PNGs (images named 1.png, 2.png, ...)
     if os.path.exists(out_pdf):
         os.remove(out_pdf)
-    for old in glob.glob("[0-9]*.png"):
+    # cleanup previous PNGs for this page
+    for old in glob.glob(f"{page_index}_*.png"):
         os.remove(old)
 
     # store paths of all cropped images
     img_paths = []
     doc = fitz.open(pdf_path)
-    page = doc[page_index]
+    page = doc[page_index - 1]
 
     # Render page to bitmap (72 dpi * zoom)
     mat = fitz.Matrix(zoom, zoom)
@@ -103,7 +104,7 @@ def select_and_redact(
     for idx, (x0, y0, x1, y1) in enumerate(selections, start=1):
         # Save cropped selection as PNG
         cropped = img.crop((x0, y0, x1, y1))
-        img_path = f"{idx}.png"
+        img_path = f"{page_index}_{idx}.png"
         cropped.save(img_path, "PNG")
         print(f"✓  Cropped image exported to {img_path}")
         img_paths.append(img_path)
@@ -128,7 +129,7 @@ def main_cli():
         "-i", "--input", dest="input_pdf", required=True, help="Input PDF file path"
     )
     parser.add_argument(
-        "--page", type=int, default=0, help="Page index (0-based) to crop, default 0"
+        "--page", type=int, default=1, help="Page index (1-based) to crop, default 1"
     )
     args = parser.parse_args()
     # Always derive redacted PDF output path from input basename

@@ -41,6 +41,8 @@ Convert a PDF to Markdown:
 python pdfmd.py -i input.pdf [-c]
 ```
 
+The PDF converter will only take care the 1st page of the input PDF ifle.
+
 Cropping Option  
 Use `-c, --crop` to interactively select and redact areas before conversion:
 
@@ -62,14 +64,6 @@ python pdfcrop.py -i input.pdf [--page N]
 - `--page N`: zero‑based page index (default: 0, rarely used)
 - Zoom level is now read from the `PDFCROP_ZOOM_LEVEL` environment variable (set in `.env`; default 2).
 
-Splitting Tool
-
-Run `pdfsplit.py` to split each page of a PDF into its own file:
-```bash
-python pdfsplit.py -i input.pdf
-```
-- `-i/--input`: source PDF file path (required)
-- Outputs `<input_basename>_pdfsplit_1.pdf`, `<input_basename>_pdfsplit_2.pdf`, …
 
 Notes
 -----
