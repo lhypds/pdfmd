@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import os
+import glob
 import fitz  # PyMuPDF
 import click
 
@@ -9,6 +10,10 @@ import click
 def main(input_pdf):
     """Split each page of the PDF into its own file."""
     base = os.path.splitext(os.path.basename(input_pdf))[0]
+    # cleanup any existing split PDF files for this base
+    for old in glob.glob(f"{base}_pdfsplit_*.pdf"):
+        os.remove(old)
+        click.echo(f"[INFO] Removed old split file: {old}")
     doc = fitz.open(input_pdf)
     for idx in range(len(doc)):
         single = fitz.open()
