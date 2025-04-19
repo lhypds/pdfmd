@@ -106,13 +106,18 @@ def main(input_pdfs, crop):
             click.echo("[ABORT] Phase 2 cancelled. Exiting.")
             sys.exit(0)
         click.echo("[INFO] Phase 2: converting cropped PDFs to Markdown...")
+        # Retry loop on conversion failure: only skip the very first wait
+        first_try = True
         for pdf in splited_pdfs:
-            # Retry loop on conversion failure
             while True:
-                click.echo(
-                    f"[INFO] Converting {pdf} to Markdown... (waiting 30s to avoid rate limit)"
-                )
-                sleep(30)
+                if first_try:
+                    click.echo(f"[INFO] Converting {pdf} to Markdown...")
+                    first_try = False
+                else:
+                    click.echo(
+                        f"[INFO] Converting {pdf} to Markdown... (waiting 30s to avoid rate limit)"
+                    )
+                    sleep(30)
                 md_cmd = [
                     sys.executable,
                     os.path.join(scripts_dir, "pdfmd.py"),
@@ -142,10 +147,20 @@ def main(input_pdfs, crop):
         ):
             click.echo("[INFO] Phase 3: combining Markdown files...")
             # collect and sort markdown files by page index
-            md_files = sorted(
-                glob.glob("*_pdfmd.md"),
-                key=lambda x: int(re.search(r"_pdfcrop_(\d+)_pdfmd\.md$", x).group(1)),
-            )
+            if crop:
+                md_files = sorted(
+                    glob.glob("*_pdfcrop_*_pdfmd.md"),
+                    key=lambda x: int(
+                        re.search(r"_pdfcrop_(\d+)_pdfmd\.md$", x).group(1)
+                    ),
+                )
+            else:
+                md_files = sorted(
+                    glob.glob("*_pdfsplit_*_pdfmd.md"),
+                    key=lambda x: int(
+                        re.search(r"_pdfsplit_(\d+)_pdfmd\.md$", x).group(1)
+                    ),
+                )
             combined = f"{base}_pdfmd.md"
             with open(combined, "w", encoding="utf-8") as fout:
                 for md in md_files:
