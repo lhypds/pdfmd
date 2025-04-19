@@ -133,7 +133,10 @@ def main_cli():
         "-i", "--input", dest="input_pdf", required=True, help="Input PDF file path"
     )
     parser.add_argument(
-        "--page", type=int, default=1, help="Page index (1-based) to crop, default 1"
+        "--page",
+        type=int,
+        required=True,
+        help="Page index (1-based) to crop.",
     )
     args = parser.parse_args()
     # Always derive redacted PDF output path from input basename

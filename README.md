@@ -52,11 +52,13 @@ The PDF converter will only take care the 1st page of the input PDF ifle.
 Crop Tool
 
 Run `pdfcrop.py` independently to select, crop, and redact:
+
 ```bash
-python pdfcrop.py -i input.pdf [--page N]
+python pdfcrop.py -i input.pdf --page 1
 ```
+
 - `-i/--input`: source PDF (required)
-- `--page N`: 1‑based page index (default: 1, rarely used)
+- `--page N`: 1‑based page index (required)
 - Selections always export as `1.png`, `2.png` ...
 - Zoom level is now read from the `PDFCROP_ZOOM_LEVEL` environment variable (set in `.env`; default 2).
 
