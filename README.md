@@ -44,7 +44,8 @@ python main.py -i input.pdf -c
 ```
 
 - `-c` for enable crop, if no image in file no need crop.  
-- `-i` for input file. Input can be multiple files or folder. If input is a folder it will loop all PDFs in the folder.  
+- `-i` for input file. Input can be multiple files or folder. Example: `-i file1.pdf -i file2.pdf`.  
+   If input is a folder it will loop all PDFs in the folder.  
 - The output will be a Markdown file with many PNG files.  
 - This can be used as generative AI's input.  
 
