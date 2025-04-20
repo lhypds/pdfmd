@@ -3,7 +3,7 @@
 pdfmd
 =====
 
-This tool uses Azure AI Document Intelligence to extract and convert text and tables from PDFs into Markdown, and crops images within the PDF—all optimized for input into generative AI systems.
+This tool extract and convert text and tables from PDFs into Markdown, and crops images within the PDF—all optimized for input into generative AI systems.
 
 
 Setup
@@ -34,6 +34,19 @@ Setup
    ```
 
 
+Extraction Engines
+------------------
+
+1. Azure AI Document Intelligence (`-e azureai`)
+   This engine support OCR and provide higher accuracy.  
+   Non-free and API key setup is required.  
+
+2. pdfplumber (`-e plumber`)
+   This is a python library can do same thing.  
+   It's only support text already in PDF, for scanned document or image it cannot extract text/table.  
+   For some tables with uncommon cell combination it cannot extract properly.  
+
+
 Usage
 -----
 
@@ -47,6 +60,7 @@ python main.py -i input.pdf -c
 - `-c` for enable crop, if no image in file no need crop.  
 - `-i` for input file. Input can be multiple files or folder. Example: `-i file1.pdf -i file2.pdf`.  
    If input is a folder it will loop all PDFs in the folder.  
+- `-e` or `--engine` to specify extraction engine, can be `azureai`(default) or `plumber`.  
 - The output will be a Markdown file with many PNG files.  
 - This can be used as generative AI's input.  
 
@@ -62,6 +76,7 @@ python pdfmd.py -i input.pdf
 ```
 
 - `-i` can only process single PDF file.  
+- `-e` or `--engine` to specify extraction engine, can be `azureai`(default) or `plumber`.  
 
 Output file (single): `<input_basename>_pdfmd.md`  
 

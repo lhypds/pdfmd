@@ -26,7 +26,15 @@ import re  # for sorting markdown files
     default=False,
     help="Crop PDF image area before processing",
 )
-def main(input_pdfs, crop):
+@click.option(
+    "-e",
+    "--engine",
+    "engine",
+    type=click.Choice(["azureai", "plumber"], case_sensitive=False),
+    default="azureai",
+    help="Extraction engine to use when calling pdfmd.py (azureai or plumber)",
+)
+def main(input_pdfs, crop, engine):
     """Crop all pages (if requested) then convert to Markdown for multiple PDFs or folders."""
     # Expand input_pdfs: if any entry is a directory, add all PDFs in that directory
     expanded_inputs = []
@@ -123,6 +131,8 @@ def main(input_pdfs, crop):
                     os.path.join(scripts_dir, "pdfmd.py"),
                     "-i",
                     pdf,
+                    "-e",
+                    engine,
                 ]
                 try:
                     subprocess.run(md_cmd, check=True)
