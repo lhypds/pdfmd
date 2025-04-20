@@ -37,14 +37,14 @@ Setup
 Extraction Engines
 ------------------
 
-1. Azure AI Document Intelligence (`-e azureai`)
+1. Azure AI Document Intelligence (`-e azureai`, default)
    This engine support OCR and provide higher accuracy.  
    Non-free and API key setup is required.  
 
 2. pdfplumber (`-e plumber`)
-   This is a python library can do same thing.  
-   It's only support text already in PDF, for scanned document or image it cannot extract text/table.  
-   For some tables with uncommon cell combination it cannot extract properly.  
+   This is a python library can do same thing pure locally.  
+   It's only support PDFs that text already exists, for scanned document or image it cannot extract.  
+   For some tables with uncommon cell combination it cannot extract properly (missing words).  
 
 
 Usage
