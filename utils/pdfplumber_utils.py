@@ -81,7 +81,8 @@ def pdfplumber_pdfmd(input_path: str, output_path: str) -> str:
                 # obj is a pdfplumber Table
                 table = obj.extract()
                 # header
-                f.write("| " + " | ".join(table[0]) + " |\n")
+                header_cells = [cell or "" for cell in table[0]]
+                f.write("| " + " | ".join(header_cells) + " |\n")
                 f.write("| " + " | ".join(["---"] * len(table[0])) + " |\n")
                 for row in table[1:]:
                     cells = [cell or "" for cell in row]
