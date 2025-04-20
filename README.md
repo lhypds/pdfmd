@@ -91,7 +91,7 @@ Convert Excel to PDFs, one sheet one PDF file.
 python excelpdf.py -i input.xslx
 ```
 
-Output file (multiple): `<input_basename>_<sheet>.pdf`  
+Output file (multiple): `<input_basename>_excelpdf_<sheet>.pdf`  
 
 4. pdfsplit.py
 

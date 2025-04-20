@@ -89,7 +89,7 @@ def main():
             safe_name = "".join(
                 c if c.isalnum() or c in (" ", "_") else "_" for c in sheet_name
             ).strip()
-            out_file = os.path.join(out_dir, f"{base_name}_{safe_name}.pdf")
+            out_file = os.path.join(out_dir, f"{base_name}_excelpdf_{safe_name}.pdf")
             try:
                 # Use named args for COM ExportAsFixedFormat
                 sheet.ExportAsFixedFormat(Type=0, Filename=out_file)
