@@ -53,7 +53,7 @@ Modules
 
 1. pdfmd.py  
 
-Input file must be single page PDF, if it is multiple pages, it will only process the first page.  
+Input file should be a single page PDF, if it is multiple pages, it will only process the first page.  
 Convert a PDF to Markdown:
 
 ```bash
