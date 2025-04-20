@@ -37,7 +37,8 @@ Setup
 Usage
 -----
 
-Crop remove images in PDF (and save) and convert to Markdown:  
+Crop remove images in PDF (and save) and convert to Markdown.  
+The `main.py` chains modules automatically:  
 
 ```bash
 python main.py -i input.pdf -c
