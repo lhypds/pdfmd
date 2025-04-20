@@ -8,6 +8,7 @@ from rich.progress import (
     TextColumn,
     TimeElapsedColumn,
 )
+from utils.aws_utils import s3_upload
 
 
 # Load env variables
@@ -25,20 +26,25 @@ _load_env()
 AZURE_ENDPOINT = os.getenv("AZURE_ENDPOINT")
 AZURE_API_KEY = os.getenv("AZURE_API_KEY")
 AZURE_ENDPOINT = AZURE_ENDPOINT.rstrip("/") if AZURE_ENDPOINT else None
+AWS_S3_BUCKET = os.getenv("AWS_S3_BUCKET")  # S3 bucket for uploading PDFs
 API_VERSION = "2024-11-30"
 MODEL_ID = "prebuilt-layout"
 
 
-def azure_ai_pdfmd(pdf_url: str, output_path: str) -> str:
+def azure_ai_pdfmd(pdf_path: str, output_path: str) -> str:
     """
-    Analyze a PDF via Azure Document Intelligence and write markdown output.
+    Upload PDF to S3, analyze via Azure Document Intelligence, and write markdown output.
     Returns the path to the generated markdown file.
     """
-    if not AZURE_ENDPOINT or not AZURE_API_KEY:
+    if not AZURE_ENDPOINT or not AZURE_API_KEY or not AWS_S3_BUCKET:
         raise ValueError(
             "AZURE_ENDPOINT and AZURE_API_KEY environment variables must be set."
         )
 
+    # upload and verify PDF on S3
+    pdf_url = s3_upload(pdf_path, AWS_S3_BUCKET)
+
+    # prepare analyze endpoint
     analyze_url = (
         f"{AZURE_ENDPOINT}/documentintelligence/documentModels/{MODEL_ID}:analyze"
         f"?_overload=analyzeDocument&api-version={API_VERSION}"
