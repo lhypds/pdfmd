@@ -36,14 +36,6 @@ def main(input_path, engine):
     output_path = f"{base}_pdfmd.md"
 
     # choose extraction engine
-    if engine.lower() == "plumber":
-        click.echo("[INFO] Using pdfplumber for extraction...")
-        try:
-            result_path = pdfplumber_pdfmd(input_path, output_path)
-        except Exception as e:
-            click.echo(f"[ERROR] {e}")
-            return
-
     if engine.lower() == "azureai":
         if not AWS_S3_BUCKET:
             click.echo("[ERROR] AWS_S3_BUCKET environment variable must be set.")
@@ -55,6 +47,14 @@ def main(input_path, engine):
         # analyze via Azure AI and generate markdown
         try:
             result_path = azure_ai_pdfmd(pdf_url, output_path)
+        except Exception as e:
+            click.echo(f"[ERROR] {e}")
+            return
+
+    if engine.lower() == "plumber":
+        click.echo("[INFO] Using pdfplumber for extraction...")
+        try:
+            result_path = pdfplumber_pdfmd(input_path, output_path)
         except Exception as e:
             click.echo(f"[ERROR] {e}")
             return
