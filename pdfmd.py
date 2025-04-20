@@ -4,7 +4,7 @@ import time
 import requests
 import click
 from dotenv import load_dotenv  # load .env for environment variables
-from utils.aws_utils import upload_and_verify_pdf
+from utils.aws_utils import s3_upload
 from utils.azure_ai_utils import azure_ai_pdfmd
 
 load_dotenv()
@@ -33,7 +33,7 @@ def main(input_path):
         return
 
     # upload and verify PDF on S3
-    pdf_url = upload_and_verify_pdf(input_path, AWS_S3_BUCKET)
+    pdf_url = s3_upload(input_path, AWS_S3_BUCKET)
 
     # analyze via Azure and generate markdown
     try:
