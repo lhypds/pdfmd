@@ -44,7 +44,7 @@ python main.py -i input.pdf -c
 ```
 
 - `-c` for enable crop, if no image in file no need crop.  
-- `-i` can be multiple files, and can be a folder (will loop files in folder).  
+- `-i` for input file. Input can be multiple files or folder. If input is a folder it will loop all PDFs in the folder.  
 - The output will be a Markdown file with many PNG files.  
 - This can be used as generative AI's input.  
 
@@ -53,8 +53,6 @@ Modules
 1. pdfmd.py  
 
 Input file must be single page PDF, if it is multiple pages, it will only process the first page.  
-Input can be multiple files, if input is a folder it will loop all PDFs in the folder.  
-
 Convert a PDF to Markdown:
 
 ```bash
