@@ -24,9 +24,9 @@ AWS_S3_BUCKET = os.getenv("AWS_S3_BUCKET")
     "-e",
     "--engine",
     "engine",
-    type=click.Choice(["azureai", "plumber"], case_sensitive=False),
+    type=click.Choice(["azureai", "pdfplumber"], case_sensitive=False),
     default="azureai",
-    help="Extraction engine: azureai (default) or plumber",
+    help="Extraction engine: azureai (default) or pdfplumber",
 )
 def main(input_path, engine):
     click.echo("[INFO] Starting PDF to Markdown conversion...")
@@ -51,7 +51,7 @@ def main(input_path, engine):
             click.echo(f"[ERROR] {e}")
             return
 
-    if engine.lower() == "plumber":
+    if engine.lower() == "pdfplumber":
         click.echo("[INFO] Using pdfplumber for extraction...")
         try:
             result_path = pdfplumber_pdfmd(input_path, output_path)

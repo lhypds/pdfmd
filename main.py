@@ -30,9 +30,9 @@ import re  # for sorting markdown files
     "-e",
     "--engine",
     "engine",
-    type=click.Choice(["azureai", "plumber"], case_sensitive=False),
+    type=click.Choice(["azureai", "pdfplumber"], case_sensitive=False),
     default="azureai",
-    help="Extraction engine to use when calling pdfmd.py (azureai or plumber)",
+    help="Extraction engine to use when calling pdfmd.py (azureai or pdfplumber)",
 )
 def main(input_pdfs, crop, engine):
     """Crop all pages (if requested) then convert to Markdown for multiple PDFs or folders."""

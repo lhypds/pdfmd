@@ -41,8 +41,8 @@ Extraction Engines
    - This engine support OCR and provide higher accuracy.  
    - Non-free and API key setup is required.  
 
-2. pdfplumber (`-e plumber`)  
-   - This is a python library can do same thing pure locally.  
+2. pdfplumber (`-e pdfplumber`)  
+   - This is a python package can do same thing pure locally.  
    - For text-based document it's okay but for table-based document it is pretty low-accuracy.  
      Some tables with uncommon cell combination it cannot extract properly. (like missing words or disorded).  
    - It's only support PDFs that text already exists in file, for scanned document or image not work.  
@@ -61,7 +61,7 @@ python main.py -i input.pdf -c
 - `-c` for enable crop, if no image in file no need crop.  
 - `-i` for input file. Input can be multiple files or folder. Example: `-i file1.pdf -i file2.pdf`.  
    If input is a folder it will loop all PDFs in the folder.  
-- `-e` or `--engine` to specify extraction engine, can be `azureai`(default) or `plumber`.  
+- `-e` or `--engine` to specify extraction engine, can be `azureai`(default) or `pdfplumber`.  
 - The output will be a Markdown file with many PNG files.  
 - This can be used as generative AI's input.  
 
