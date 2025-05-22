@@ -5,5 +5,4 @@ python-dotenv
 boto3
 pymupdf
 pillow
-pywin32
 pdfplumber
