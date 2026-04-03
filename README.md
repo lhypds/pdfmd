@@ -1,9 +1,8 @@
-![ChatGPT Image Apr 20, 2025, 05_19_22 AM](https://github.com/user-attachments/assets/a701d46a-5c8b-4246-946f-6c67992f60c0)
 
 pdfmd
 =====
 
-This tool extract and convert text and tables from PDFs into Markdown, and crops images within the PDF—all optimized for input into generative AI systems.
+This tool extracts and converts text and tables from PDFs into Markdown, and crops images within the PDF—all optimized for input into generative AI systems.
 
 
 Setup
@@ -38,12 +37,12 @@ Extraction Engines
 ------------------
 
 1. Azure AI Document Intelligence (`-e azureai`, default)  
-   - This engine support OCR and provide higher accuracy.  
+   - This engine supports OCR and provides higher accuracy.  
    - Non-free and API key setup is required.  
 
 2. pdfplumber (`-e pdfplumber`)  
-   - This is a python package can do same thing pure locally.  
-   - For text-based document it's okay but for table-based document it is pretty low-accuracy.  
+   - This is a python package that can do the same thing purely locally.  
+   - For text-based documents it's okay but for table-based documents it is pretty low-accuracy.  
      Some tables with uncommon cell combination it cannot extract properly. (like missing words or disorded).  
    - It's only support PDFs that text already exists in file, for scanned document or image not work.  
 
